@@ -1,0 +1,708 @@
+<!--
+ API Documentation HTML Template  - 1.0.1
+ Copyright © 2016 Florian Nicolas
+ Licensed under the MIT license.
+ https://github.com/ticlekiwi/API-Documentation-HTML-Template
+
+ Modified by Myst Auth - Jan 1, 2024
+ !-->
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Myst Auth Documentation</title>
+    <meta name="description" content="Myst Auth Passkey API Documentation">
+    <meta name="author" content="ticlekiwi">
+    <meta name="author" content="mystsec">
+
+    <meta http-equiv="cleartype" content="on">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="../static/hightlightjs-dark.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/highlight.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;1,300&family=Source+Code+Pro:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/style.css" media="all">
+    <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+<body>
+<div class="left-menu">
+    <div class="content-logo">
+        <div class="logo">
+            <img alt="Lock Icon" title="Lock Icon" src="../static/lock-logo.png" height="32" />
+            <span>Myst Auth Docs</span>
+        </div>
+        <button class="burger-menu-icon" id="button-menu-mobile">
+            <svg width="34" height="34" viewBox="0 0 100 100"><path class="line line1" d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058"></path><path class="line line2" d="M 20,50 H 80"></path><path class="line line3" d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942"></path></svg>
+        </button>
+    </div>
+    <div class="mobile-menu-closer"></div>
+    <div class="content-menu">
+        <div class="content-infos">
+            <div class="info"><b>Version:</b> 1.0.0</div>
+            <div class="info"><b>Last Updated:</b> January 1, 2024</div>
+        </div>
+        <ul>
+            <li class="scroll-to-link active" data-target="content-intro">
+                <a>Intro</a>
+            </li>
+            <li class="scroll-to-link" data-target="content-quickstart">
+                <a>Quickstart</a>
+            </li>
+            <li class="scroll-to-link" data-target="content-development">
+                <a>Development</a>
+            </li>
+            <li class="scroll-to-link" data-target="content-api-settings">
+                <a>API Settings</a>
+            </li>
+            <li class="scroll-to-link" data-target="content-auth-link">
+                <a>Auth Link</a>
+            </li>
+            <li class="scroll-to-link" data-target="content-auth-token">
+                <a>Auth Token</a>
+            </li>
+            <li class="scroll-to-link" data-target="content-user-management">
+                <a>User Management</a>
+            </li>
+            <li class="scroll-to-link" data-target="content-attributions">
+                <a>Attributions</a>
+            </li>
+            <li class="scroll-to-link" data-target="content-terms">
+                <a>Terms of Use</a>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="content-page">
+    <div class="content-code"></div>
+    <div class="content">
+        <div class="overflow-hidden content-section" id="content-intro">
+            <h1>Intro</h1>
+            <p>
+                The Myst Auth API allows you to add secure, customizable passkey authentication and identity management to your web app with just a few lines of code! Passkeys let users authenticate using their device's biometrics or a security key, eliminating the need to remember passwords. Using asymmetric cryptography, passkeys also greatly reduce the threat of phishing attacks, achieving better security than passwords with a better user experience. Although passkeys are relatively new, <a href="https://caniuse.com/webauthn" target="_blank">96%</a> of users' devices/browsers support a version of passkeys used by Myst Auth. Learn more about passkeys in <a target="_blank" href="https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys-work/">this Google Blog</a> and <a target="_blank" href="https://developers.yubico.com/Passkeys/How_passkeys_work.html">this Yubico explainer</a>.
+            </p>
+            <p>
+                You can try a demo of Myst Auth's user sign up/login experience by signing in to get your Myst Auth API Key at the start of the Quickstart section. By default, your account gets 100 API Tokens (100 user accounts), but if you are using Myst Auth for a non-profit or educational resource, please contact us and we may be able to upgrade your account for free.
+            </p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-quickstart">
+            <h1>Quickstart <a href="#quickstart">#</a></h1>
+
+            <p>You can add Myst Auth to your site in 3 steps:</p>
+            <ol>
+                <li>Get Myst API Key</li>
+                <li>Add Myst Auth Links to Frontend</li>
+                <li>Add Authentication Middleware to Backend</li>
+            </ol>
+
+            <br><h4>Get Myst API Key:</h4>
+            <p><a href="">Sign Up/Log In</a> to try out Myst Auth and get your API Key! You will be able to manage your API in the dashboard once logged in.</p>
+            <p>Once Signed In, you'll get a Request ID (<code class="higlighted break-word">rid</code>). Your Request ID  is used to provide a single base Auth Link (which you'll use next) to initiate user sign ups or logins.</p>
+
+            <br><h4>Add Myst Auth Links to Fronted:</h4>
+            <p>Your Auth Links are where your user is directed so they can securely sign up or login to your app. It follows this format:</p>
+
+            <p><code class="higlighted break-word">https://mystauth.com/auth/?rid=your-request-id&ref=your-redirect-link</code></p>
+
+            <p>The <code class="higlighted break-word">ref</code> url parameter must be set and should point to the page (on your domain) which you want the user to reach after they sign up or login. For sign ups this would typically be a user onboarding page where you can add the user to your database. To protect Auth Tokens, your redirect link must use TLS and <strong>HTTPS</strong> and it must use the origin linked to your API Key (Myst Auth blocks requests which do not meet these requirements).</p>
+            <p>If your redirect link has its own parameters, you will need to encode the url before using it in a Auth Link. Learn more about this and other parameters which can be use for UI customization in the Auth Link section.</p>
+
+            <p>Now you can add (either hard coded or dynamically generated) your Auth Links to your frontend so that your users can authenticate themselves. Here is an example Sign Up button in HTML:</p>
+
+            <pre><code class="html">&lt;button onclick="window.location.href='https://mystauth.com/auth/?rid=your-rid&ref=redirect-link'"&gt;Sign Up&lt;/button&gt;</code></pre>
+
+            <p>Once your user authenticates with Myst, they will be redirected to your page with their Username and a temporary Auth Token (both as url parameters) which you will use to verify their identity by making an API call to Myst Auth's token verify service. If the token is valid, the API will return a new token which you must pass back to the user so they can remain logged in. This authentication process can be added to all of your pages and APIs through an authentication middleware.</p>
+
+            <br><h4>Add Authentication Middleware to Backend:</h4>
+
+            <p>The token verification API has the following endpoint:</p>
+
+            <p><code class="higlighted break-word">https://mystauth.com/api/v1/user/token/verify/</code></p>
+
+            <p>with the following POST parameters:</p>
+
+            <table class="central-overflow-x">
+                <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>id</td>
+                    <td>Your API id.</td>
+                </tr>
+                <tr>
+                    <td>apiKey</td>
+                    <td>Your API key.</td>
+                </tr>
+                <tr>
+                    <td>usr</td>
+                    <td>User's username</td>
+                </tr>
+                <tr>
+                    <td>token</td>
+                    <td>User's Auth Token</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <br><p>If the token is verified successfully, the JSON response will follow this format:</p>
+
+            <pre><code class="json">{success: true, token: the-new-auth-token}</code></pre>
+
+            <p>The Auth Tokens generated by Auth Links timeout after 45 seconds to prevent Man-In-The-Middle attacks, but new tokens generated after the initial authentication process timeout after 1 hour by default (can be changed in your API account settings). Learn more in the Auth Token section.</p>
+
+            <p>Here is an example Authentication Middleware written in python for the Django framework:</p>
+
+            <pre><code class="python">#Django Myst Auth Middleware Example
+import requests
+
+class MystAuthMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response  #initiate middleware, not special for Myst Auth
+
+    def __call__(self, request, *args, **kwargs):
+        if request.method == 'GET' and 'usr' in request.GET and 'token' in request.GET:  #check if relevant url params exist
+            user = request.GET.get('usr')  #get username param
+            token = request.GET.get('token')  #get auth token param
+
+            myst_endpoint = "https://mystauth.com/api/v1/user/token/verify/" #Myst Auth Token verify endpoint
+
+            myst_params = {  #POST parameters
+                "id": myst_id,  #your API id, best to retrieve from environment variable or secrets file
+                "apiKey": myst_api_key,  #your API key, best to retrieve from environment variable or secrets file
+                "usr": user,
+                "token": token,
+            }
+
+            auth = requests.post(myst_endpoint, json=myst_params)  #make API call, pass params
+            auth = auth.json()  #get json
+
+            authenticated = auth['success']  #gets 'success' field from json
+
+            if authenticated:  #checks if 'success': true, token was verified
+                request.authenticated = True  #sets request param 'authenticated' to True
+                request.token = auth['token']  #sets request param 'token' to the new token from the API call json
+            else:
+                request.authenticated = False #sets request param 'authenticated' to False
+        else:
+            request.authenticated = False #sets request param 'authenticated' to False
+
+        return self.get_response(request)  #returns authenticated request to views.py in Django (the page's controller function)</code></pre>
+
+            <p>There are many ways for your middleware to let your controller function know the result of the authentication, but in this example, the following request parameters are set: <code class="higlighted break-word">authenticated</code> informing the result, and, if it was successful (the user's Auth Token is valid and has not timed out), <code class="higlighted break-word">token</code> providing the new Auth Token. Once the user has been authenticated through the Auth Link, you can choose to continue using Myst Auth Tokens to manage their session or you can use your own session management system. To continue using Myst to secure your user, the new token must be returned to the user (ex. through a hidden template element or JSON response field) so that they can be authenticated in their next request or call to your API.</p>
+
+            <p>Once your user gets their Auth Token, you can choose to store the token in a cookie or <code class="higlighted break-word">localStorage</code> so all the user's tabs to your page can remain authenticated through the middleware. If you use cookies, you will need to modify your middleware to be able to get the username and Auth Token from the cookie in addition to url params, and if you use <code class="higlighted break-word">localStorage</code>, you will need to add more code to your frontend to check for the token and refresh the page to the authenticated session. Each request made by users to your app will authenticate their token with Myst Auth and the new token is returned.</p>
+
+            <p>That's it! 🎉 You have now added secure passkey authentication to your site! The rest of the Docs has more details, settings, and customizations.</p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-development">
+            <h1>Development <a href="#development">#</a></h1>
+
+            <p>You can use Myst Auth in a local development environment using the following credentials for the <code class="higlighted break-word">localhost</code> origin. Note: these credentials will not work for <code class="higlighted break-word">127.0.0.1</code> redirect links.</p>
+
+            <table class="central-overflow-x">
+                <thead>
+                <tr>
+                    <th>Attribute</th>
+                    <th>Value</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>API Id:</td>
+                    <td><code class="higlighted break-word">3e9a6fe7-59f6-4d50-aba0-af5ab5ebb508</code></td>
+                </tr>
+                <tr>
+                    <td>API Key:</td>
+                    <td><code class="higlighted break-word">da8120ad1d08b93a4ec575de94c115171c53b5bbc2c0360cea6c10feb286296563a0a263c4e0a826e3b7c60c6750980d746cde1432d52b5e8c1225fee897ac56</code></td>
+                </tr>
+                <tr>
+                    <td>RID:</td>
+                    <td><code class="higlighted break-word">a10d1520c91348db99f55a3411befab0</code></td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+        <div class="overflow-hidden content-section" id="content-api-settings">
+            <h1>API Settings <a href="#api-settings">#</a></h1>
+
+            <p>When you create a new API account to use Myst Auth and in your API account dashboard, you can change the following attributes:</p>
+
+            <table class="central-overflow-x">
+                <thead>
+                <tr>
+                    <th>Attribute</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Origin</td>
+                    <td>The <strong>Hostname</strong> of your app (includes subdomain and domain). <a href="https://developer.mozilla.org/en-US/docs/Web/API/URL/hostname" target="_blank">Learn more about Hostnames</a>. Must match the hostname of the redirect link you set in Myst Auth Links. Your account origin is editable.</td>
+                </tr>
+                <tr>
+                    <td>TTL</td>
+                    <td>The time-to-live for Auth Tokens generated after the initial passkey authentication. Default is <code class="higlighted break-word">3600</code> seconds (1 hour). TTL for initial Auth Tokens passed to your redirect link after the Myst Auth Link passkey authentication is 45 seconds and is not editable.</td>
+                </tr>
+                <tr>
+                    <td>BioOnly</td>
+                    <td>If set to <code class="higlighted break-word">True</code>, enforces that users must register their passkey using on-device biometric authentication (Apple TouchID, Windows Hello, etc.) and are not allowed to use external authenticators like security keys. Default is <code class="higlighted break-word">False</code>. BioOnly is editable.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="overflow-hidden content-section" id="content-auth-link">
+            <h1>Auth Link <a href="#auth-link">#</a></h1>
+
+            <p>Myst Auth Links are where you direct your users when they are signing up or logging in to your app so they can authenticate through Myst Auth. The base url is:</p>
+
+            <p><code class="higlighted break-word">https://mystauth.com/auth/</code></p>
+
+            <p>with the following url/GET parameters:</p>
+
+            <table class="central-overflow-x">
+                <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>rid</td>
+                    <td>Your Request ID, listed in your API account dashboard.</td>
+                </tr>
+                <tr>
+                    <td>ref</td>
+                    <td>The redirect url where the user should be directed after being authenticated. Must use HTTPS and match the origin registered with your API account. If your redirect url itself contains url parameters, it must be URL Encoded (in JS using <code class="higlighted break-word">encodeURIComponent()</code>) for those params to be properly passed. Otherwise, the url does not need to be encoded, but should be the last parameter.</td>
+                </tr>
+                <tr>
+                    <td>img</td>
+                    <td>(Optional) ID of image to be set as background image. See below for list of available IDs and images.</td>
+                </tr>
+                <tr>
+                    <td>bgclr</td>
+                    <td>(Optional) Hex color, without '#', for the UI background. If a background image is set, this param won't be used.</td>
+                </tr>
+                <tr>
+                    <td>clr</td>
+                    <td>(Optional) Hex color, without '#', for the Myst Auth UI's button.</td>
+                </tr>
+                <tr>
+                    <td>hovclr</td>
+                    <td>(Optional) Hex color, without '#', for the Myst Auth UI's button hover.</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <br><p>The <code class="higlighted break-word">img</code>, <code class="higlighted break-word">bgclr</code>, <code class="higlighted break-word">clr</code>, and <code class="higlighted break-word">hovclr</code> parameters were added to Myst Auth to help you convey your website's theme on the Myst Auth page UI and give your user's a more familiar experience. Contact us if you want to add custom branding to your Auth Link.</p>
+
+            <p>Additionally, if you are using an Auth Link for a login button (you know the user has an account), you can append the <code class="higlighted break-word">#login</code> url hash parameter so the UI will show the login option first. Putting these options together, here is an example Auth Link with a background image and setting the login tab to be shown first:</p>
+
+            <p><code class="higlighted break-word">https://mystauth.com/auth/?rid=00000000000000000000000000000000&img=RdELgb1bNz8&ref=https%3A%2F%2Fexample.com%2Fdashboard%2F%3Fa%3D1%26b%3D2#login</code></p>
+
+            <br><h4>Background Images</h4>
+
+            <p>Our background image options are taken from Unsplash and the <code class="higlighted break-word">img</code> IDs are their Unsplash IDs, but, due to the possibility of code injection, you can only pass IDs for the following vetted, stored images:</p>
+
+            <table class="central-overflow-x">
+                <thead>
+                <tr>
+                    <th>Image ID</th>
+                    <th>Unsplash Info & Image Link</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code class="higlighted break-word">RdELgb1bNz8</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@francesco_ungaro" target="_blank">Francesco Ungaro</a> on <a href="https://unsplash.com/photos/black-shore-RdELgb1bNz8" target="_blank">Unsplash</a></td>
+                    <td>Waves and Black Sand</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">5LOhydOtTKU</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@jdiegoph" target="_blank">Diego PH</a> on <a href="https://unsplash.com/photos/shooting-star-in-night-sky-5LOhydOtTKU" target="_blank">Unsplash</a></td>
+                    <td>Shooting Star in Red Night Sky</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">ECpIDNdmO7k</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@eberhardgross" target="_blank">eberhard 🖐 grossgasteiger</a> on <a href="https://unsplash.com/photos/gray-rocky-hill-formation-ECpIDNdmO7k" target="_blank">Unsplash</a></td>
+                    <td>Rock and Night Sky</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">_PK7rviBLG0</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@nate_dumlao" target="_blank">Nathan Dumlao</a> on <a href="https://unsplash.com/photos/top-view-of-mountain-covered-by-clouds-_PK7rviBLG0" target="_blank">Unsplash</a></td>
+                    <td>Sunset Above the Clouds</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">p3NOK6MhvKQ</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@francesco_ungaro" target="_blank">Francesco Ungaro</a> on <a href="https://unsplash.com/photos/desert-3d-wallpaper-p3NOK6MhvKQ" target="_blank">Unsplash</a></td>
+                    <td>Desert Dunes</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">PwzISwC2kLs</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@hyperickz" target="_blank">Arindam Saha</a> on <a href="https://unsplash.com/photos/mountains-covered-with-fogs-PwzISwC2kLs" target="_blank">Unsplash</a></td>
+                    <td>Green Mountains</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">T-FSAK4Bv9c</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@jadestephens" target="_blank">Jade Stephens</a> on <a href="https://unsplash.com/photos/snow-capped-mountains-during-daytime-T-FSAK4Bv9c" target="_blank">Unsplash</a></td>
+                    <td>Snowy Mountains</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">-RlktmDy3Ec</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@neom" target="_blank">NEOM</a> on <a href="https://unsplash.com/photos/the-sun-is-setting-over-a-mountain-range--RlktmDy3Ec" target="_blank">Unsplash</a></td>
+                    <td>Rock Structures Silhouette</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">nXrvs7RNUgg</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@francesco_ungaro" target="_blank">Francesco Ungaro</a> on <a href="https://unsplash.com/photos/the-water-is-very-dark-and-the-light-is-shining-on-the-surface-nXrvs7RNUgg" target="_blank">Unsplash</a></td>
+                    <td>Blue Mythical Pattern</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">sFRQOGK8zoA</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@omidarmin" target="_blank">Omid Armin</a> on <a href="https://unsplash.com/photos/a-close-up-of-a-tree-bark-with-blue-and-red-colors-sFRQOGK8zoA" target="_blank">Unsplash</a></td>
+                    <td>Blue Orange Tree Bark</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">cjHRI1OwKbk</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@jaspergarrattphotography" target="_blank">Jasper Garratt</a> on <a href="https://unsplash.com/photos/the-night-sky-is-filled-with-stars-and-trees-cjHRI1OwKbk" target="_blank">Unsplash</a></td>
+                    <td>Night Sky</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">x-nVoti8RKw</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@lilrohit" target="_blank">Rohit Choudhari</a> on <a href="https://unsplash.com/photos/x-nVoti8RKw" target="_blank">Unsplash</a></td>
+                    <td>Prism Pattern</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">WqPAETBU2G8</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@sharonmccutcheon" target="_blank">Alexander Grey</a> on <a href="https://unsplash.com/photos/a-dark-blue-crumpled-paper-background-WqPAETBU2G8" target="_blank">Unsplash</a></td>
+                    <td>Blue Rock Pattern</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">rakVHUzXLeM</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@jdelrivero" target="_blank">Jon Del Rivero</a> on <a href="https://unsplash.com/photos/a-blurry-photo-of-the-ocean-and-sky-rakVHUzXLeM" target="_blank">Unsplash</a></td>
+                    <td>Ocean Sky Oil Painting</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">uD0BmoYgWk4</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@didpics" target="_blank">Didier VEILLON</a> on <a href="https://unsplash.com/photos/rows-of-red-and-white-chairs-in-a-stadium-uD0BmoYgWk4" target="_blank">Unsplash</a></td>
+                    <td>Red Chair Pattern</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">uF6SAMRXJ2c</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@solenfeyissa" target="_blank">Solen Feyissa</a> on <a href="https://unsplash.com/photos/pink-and-blue-abstract-painting-uF6SAMRXJ2c" target="_blank">Unsplash</a></td>
+                    <td>Blue Purple Swirl Pattern</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">XsQ8nUKpAO4</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@erol" target="_blank">Erol Ahmed</a> on <a href="https://unsplash.com/photos/a-gold-metallic-background-with-vertical-lines-XsQ8nUKpAO4" target="_blank">Unsplash</a></td>
+                    <td>Gold Metallic Pattern</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">OvaPxvvFYNo</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@snapsbyclark" target="_blank">Clark Van Der Beken</a> on <a href="https://unsplash.com/photos/a-close-up-of-several-blue-plastic-pieces-OvaPxvvFYNo" target="_blank">Unsplash</a></td>
+                    <td>Light Blue Pattern</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">SUcsl2HpfbA</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@rajabbarack" target="_blank">untldshots</a> on <a href="https://unsplash.com/photos/a-close-up-of-a-sand-dune-in-the-desert-SUcsl2HpfbA" target="_blank">Unsplash</a></td>
+                    <td>Sand Dune Pattern</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">12-LhcMD2Hg</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@eugene_golovesov" target="_blank">Eugene Golovesov</a> on <a href="https://unsplash.com/photos/a-close-up-of-a-green-leafy-plant-12-LhcMD2Hg" target="_blank">Unsplash</a></td>
+                    <td>Dark Leaf Pattern</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">OAIAdfK8zW0</code></td>
+                    <td>Photo by <a href="https://unsplash.com/@omidarmin" target="_blank">Omid Armin</a> on <a href="https://unsplash.com/photos/a-blurry-image-of-a-green-and-yellow-background-OAIAdfK8zW0" target="_blank">Unsplash</a></td>
+                    <td>Green Pattern</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <br><p>If you set a background image, a small attribution link to the Unsplash link is placed in the bottom right of the Auth Page. Contact us if you want us to vet other images to be used in the background of your Auth Page.</p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-auth-token">
+            <h1>Auth Token <a href="#auth-token">#</a></h1>
+
+            <p>Myst Auth Tokens verify a user's identity after they have been authenticated through their passkey. To verify a user's Auth Token, use the following endpoint:</p>
+
+            <p><code class="higlighted break-word">https://mystauth.com/api/v1/user/token/verify/</code></p>
+
+            <p>with the following POST parameters:</p>
+
+            <table class="central-overflow-x">
+                <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>id</td>
+                    <td>Your API id.</td>
+                </tr>
+                <tr>
+                    <td>apiKey</td>
+                    <td>Your API key.</td>
+                </tr>
+                <tr>
+                    <td>usr</td>
+                    <td>User's username</td>
+                </tr>
+                <tr>
+                    <td>token</td>
+                    <td>User's Auth Token</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <br><p>The API will return one of the following responses:</p>
+
+            <table class="central-overflow-x">
+                <thead>
+                <tr>
+                    <th>JSON Response</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code class="higlighted break-word">{success: true, token: the-new-auth-token}</code></td>
+                    <td>The token was valid and has not timed out. A new token is returned.</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">{'success': false, 'info': 'Login Timed Out!'}</code></td>
+                    <td>Authentication failed, the token (session) timed out.</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">{'success': false, 'info': 'Authentication Failed!'}</code></td>
+                    <td>Authentication failed, the token is not valid or has already been used.</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">{'success': false, 'info': 'API Authentication Failed!'}</code></td>
+                    <td>Authentication failed, your API id and key did not authenticate successfully.</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <br><p>Once an Auth Token is used to authenticate, it is deleted and the new token is returned. If you choose to implement/continue using your own session management system to handle indentity verification after the user has authenticated through Myst, you do not need to do anything with the new token once the original is verified. Otherwise, you will need to pass the new token to the user/client (ex. through a hidden template element or JSON response field). The client script can store the Auth Token in a cookie or <code class="higlighted break-word">localStorage</code> so that all the user's tabs to your app can be authenticated through your middleware which calls the Myst Auth API to verify the token. In addition to authenticating pages, you can use Auth Tokens and the same middleware to secure your API endpoints.</p>
+
+            <p>If the Auth Token verification success returns <code class="higlighted break-word">false</code>, you should log the user out in the frontend (direct to login Auth Link if their token timed out and direct them, for ex., to your home page if their authentication failed), and ensure you don't send any user data to the un-authenticated session.</p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-user-management">
+            <h1>User Management <a href="#user-management">#</a></h1>
+
+            <p>When a user signs up through Myst Auth, they must use a unique (within users of your app) username in order to secure their passkey and to prevent Myst from requiring a different unique (and personal) identifier like an email address or phone number. At registration, Myst Auth enforces that the username contains only alphanumeric characters, underscores, and hyphens (no spaces allowed).</p>
+
+            <p>After the user signs up and is redirected to your onboarding page, you should register their unique username in your database and associate their data with that unique username.</p>
+
+            <p>At this time, we have not added a method for changing a user's username associated with their passkey, however you can implement a display name system for your users to change their public/visible username.</p>
+
+            <p>If a user wants to delete their account, the following Myst Auth endpoint can be used to delete all data associated with them (this is permanent and they will be unable to use their passkey in the future):</p>
+
+            <p><code class="higlighted break-word">https://mystauth.com/api/v1/user/delete/</code></p>
+
+            <p>with the following POST parameters:</p>
+
+            <table class="central-overflow-x">
+                <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>id</td>
+                    <td>Your API id.</td>
+                </tr>
+                <tr>
+                    <td>apiKey</td>
+                    <td>Your API key.</td>
+                </tr>
+                <tr>
+                    <td>usr</td>
+                    <td>User's username</td>
+                </tr>
+                <tr>
+                    <td>token</td>
+                    <td>User's Auth Token</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <br><p>The API will return one of the following responses:</p>
+
+            <table class="central-overflow-x">
+                <thead>
+                <tr>
+                    <th>JSON Response</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code class="higlighted break-word">{success: true}</code></td>
+                    <td>The token was valid and has not timed out. The account was successfully deleted.</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">{'success': false, 'info': 'Login Timed Out!'}</code></td>
+                    <td>Authentication failed, the token (session) timed out. The account was not deleted.</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">{'success': false, 'info': 'Authentication Failed!'}</code></td>
+                    <td>Authentication failed, the token is not valid or has already been used. The account was not deleted.</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">{'success': false, 'info': 'API Authentication Failed!'}</code></td>
+                    <td>Authentication failed, your API id and key did not authenticate successfully. The account was not deleted.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="overflow-hidden content-section" id="content-attributions">
+            <h1>Attributions <a href="#attributions">#</a></h1>
+
+            <p>This doc was made using the <a href="https://github.com/ticlekiwi/API-Documentation-HTML-Template" target="_blank">API Documentation Template made by Florian Nicolas</a> under the <a href="https://github.com/floriannicolas/API-Documentation-HTML-Template/blob/master/LICENSE" target="_blank">MIT License</a>.</p>
+
+            <p>Myst Auth uses the <a href="https://github.com/django/django" target="_blank">Django Web Framework</a> made by the <a href="https://www.djangoproject.com/foundation/" target="_blank">Django Software Foundation</a> under the <a href="https://github.com/django/django/blob/main/LICENSE" target="_blank">BSD 3-Clause Licnese</a>.</p>
+
+            <p>For parts of the passkey registration and authentication process, Myst Auth uses the <a href="https://github.com/duo-labs/py_webauthn" target="_blank">py_webauthn package made by Cisco's Duo Labs</a> under the <a href="https://github.com/duo-labs/py_webauthn/blob/master/LICENSE" target="_blank">BSD 3-Clause License</a> with the following conditions and disclaimer:</p>
+
+            <pre><code class="html">Copyright (c) 2017-2021 Duo Security, Inc. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+3. Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</code></pre>
+
+            <p>Background images in Myst Auth Links are from <a href="https://unsplash.com" target="_blank">Unsplash</a> under the <a href="https://unsplash.com/license" target="_blank">Unsplash License</a> with artist attributions listed in the Auth Link section of the docs.</p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-terms">
+            <h1>Terms of Use</h1>
+
+            <p>Last Updated January 1, 2024</p>
+
+            <p>The following Terms of Use ("Terms" or "Agreement") is an agreement between Myst Auth (referred to as "we", "us", or "our") and you (whether as an individual, a corporate entity of any kind, and/or an electronic agent) and governs your use (accessing, viewing, browsing, downloading, copying, displaying, or interacting in any manner) of our Services ("the Services" are the Myst Auth API and websites owned and operated by the Myst Auth developers, including, but not limited to mystauth.com).</p>
+
+            <h4>Access to Services</h4>
+
+            <p>Subject to your compliance with this Agreement (including, without limitation, all payment obligations), Myst Auth hereby grants to you a limited, revocable, non-exclusive, non-transferable, and non-sublicensable right, to access and use the Services.</p>
+
+            <h4>Prohibited Uses and Restrictions</h4>
+
+            <p>As a condition of your use of the Services, you will not use the Services for any purpose that is unlawful or prohibited by these Terms. You may not use the Services to falsely imply any sponsorship or association with Myst Auth or its developers. You may not use the Services in any manner that could damage, disable, overburden, disrupt or impair any Myst Auth servers or APIs, or any networks connected to any Myst Auth server or APIs, or that could interfere with any other party's use and enjoyment of the Services. You may not transmit any viruses, worms, defects, Trojan horses, or any items of a destructive nature through your use of the Services. You may not exceed or circumvent, or try to exceed or circumvent, limitations on the Services, including on any API calls, or otherwise use the Services in a manner that violates any Myst Auth documentation. You may not attempt to gain unauthorized access to the Services, other accounts, computer systems, or networks connected to any Myst Auth server or to any of the Services through hacking, password mining, or any other means. You may not obtain or attempt to obtain any materials or information through any means not intentionally made available through the Services. You may not use the Services in any way that violates any applicable federal, state, local, or international law or regulation (including, without limitation, any laws regarding the export of data or software to and from the US or other countries).</p>
+
+            <p>Myst Auth retains the right (but not the obligation) to block access to the Services for applications that we determine (in our sole discretion) to be illegal, harmful, or in violation of these Terms. For these purposes, illegal or harmful content includes but is not limited to: (a) content containing, promoting, or facilitating child sexual abuse material or human trafficking; (b) content that infringes on another person’s intellectual property rights or is otherwise unlawful; (c) content that discloses sensitive personal information, incites or exploits violence, or is intended to defraud the public; (d) content that seeks to distribute malware, facilitate phishing, or otherwise constitutes technical abuse; (e) content which is threatening, harassing, obscene, indecent, defamatory or that otherwise could adversely affect any individual, group or entity.</p>
+
+            <h4>Credentials</h4>
+
+            <p>You are responsible for maintaining the confidentiality of all usernames, passwords, passkeys, and other access credentials (such as API keys and tokens) created by or assigned to you (“Credentials”) and are solely responsible for all activities that occur with such Credentials.</p>
+
+            <p>If you permit third parties to access your Myst Auth account (e.g., by providing your API key), you do so at your sole risk and Myst Auth will not be directly or indirectly responsible or liable to you in any manner, for any harms, damages, loss, lost profits, special or consequential damages, or claims, arising out of or in connection with such permission. You acknowledge that by permitting a third party to access your Myst Auth account, the third party may obtain, modify, or delete your account data and settings.</p>
+
+            <h4>Free Services</h4>
+
+            <p>We may offer free or trial versions of the Services (“Free Services”) from time to time. With respect to each such Free Service, we will make each such Free Service available to you free of charge until the earlier of (a) the end of the free trial period (if applicable) for which you registered to use the Free Service; (b) the start date of your Subscription Term for the Paid Services version of such Free Service; or (c) termination of the Free Service by Myst Auth in our sole discretion. We will have no liability for any harm or damage arising out of or in connection with any Free Services.</p>
+
+            <h4>Recurring Billing</h4>
+
+            <p>In order to access those Services for which we require a fee (“Paid Services”) you will be required to provide Myst Auth with your credit card information (“Payment Method”). By providing a Payment Method you are authorizing us to charge your Payment Method on a monthly, annual, or pay-as-you-go basis, or as otherwise applicable for the fees associated with the Paid Services that you use. Any Payment Method that you provide us must be valid, and kept current by you during the Subscription Term. By providing us with a Payment Method, you represent and warrant that you are authorized to use such Payment Method. Myst Auth will begin billing your Payment Method for the Paid Services on the day that you begin using such Paid Services, regardless of whether you have fully configured the Paid Services as of that date.</p>
+
+            <h4>Price Changes</h4>
+
+            <p>We reserve the right to change the fees that we charge for the Service, at any time in our sole discretion, provided that we give you at least thirty (30) days’ prior notice of such changes. Unless otherwise specified in such notice to you, any changes to the subscription fees will take effect in the billing period immediately following our notice to you.</p>
+
+            <h4>Security</h4>
+
+            <p>We implement security procedures to help protect use of the Services from security threats. However, you understand that your use of the Services necessarily involves transmission of your content over networks that are not owned, operated or controlled by us, and we are not responsible for any of your content that is lost, altered, intercepted or stored across such networks. We cannot guarantee that our security procedures will be error-free, that transmissions of your content will always be secure or that unauthorized third parties will never be able to defeat our security measures or those of our third party service providers.</p>
+
+            <h4>Privacy</h4>
+
+            <p>You have read and understand our Privacy Policy, which is available <a href="/privacy" target="_blank">here</a>.</p>
+
+            <h4>Compliance with Laws</h4>
+
+            <p>You will comply with all Laws. You agree that you are responsible for determining whether use of the Services will satisfy your individual compliance obligations. You will not use the Services for any reason if you or any party that owns or controls you (if you are a legal entity), are subject to sanctions or otherwise designated on any list of prohibited or restricted parties, including but not limited to the lists maintained by the U.S. Government (e.g., the Specially Designated Nationals List and Foreign Sanctions Evaders List of the U.S. Department of Treasury, and the Entity List of the U.S. Department of Commerce), the European Union or its Member States, the United Kingdom, or other applicable government authority. You will not use the Services to export or re-export any information or technology to any country, individual, or entity to which such export or re-export is restricted or prohibited. You further acknowledge that performance of the Agreement may be subject to U.S. and non-U.S. anti-corruption and anti-bribery Laws, rules, and regulations. You therefore covenants that you will make no payments, including charitable donations, of money or anything of value, nor will such be offered, promised or paid, directly or indirectly, to any person or entity (a) to improperly influence the acts of such person or entity, (b) to induce such person or entity to use its influence with a government to obtain or retain business, or (c) to gain an improper advantage in connection with any business venture or contract in which Myst Auth is a participant.</p>
+
+            <h4>Termination of Use / Discontinuation and Modification of the Services</h4>
+
+            <p>You will lose your license to use the Services if you violate any provision of this Agreement. Myst Auth reserves the right to investigate violations of this Agreement. We reserve the right to disable or limit your access to or use of the Services ("Suspend") or terminate your user account upon receiving any number of DMCA notifications from content owners regarding your website(s), or upon learning through other means that you are a repeat infringer. We may at our sole discretion terminate your user account or Suspend or terminate your use or access to the Services at any time, with or without notice for any reason or no reason at all. If we determine you have breached the “Prohibited Uses” section, we may immediately Suspend or terminate all or part of your use of the Services, or limit End User access to certain of your resources through the Services. We also reserve the right to modify or discontinue the Services at any time (including, without limitation, by limiting or discontinuing certain features of the Services) without notice to you. We will have no liability whatsoever on account of any change to the Services or any suspension or termination of your access to or use of the Services. You may terminate your account at any time through the Service’s account dashboard.</p>
+
+            <p>You acknowledge and agree that Myst Auth is the sole arbiter of whether any use is prohibited and constitutes a breach of these Terms of Use. If Myst Auth determines that you breached these Terms of Use, your permission to Use the Services automatically and immediately terminates and you must immediately destroy any and all downloaded or printed materials and immediately discontinue use of any hyperlinks to the Services. Myst Auth is not required to provide you with any notice or any explanation for terminating or limiting your permission to use the Services. Furthermore, Myst Auth may have additional remedies at law that are available to it and Myst Auth reserves the right to exercise them at any time.</p>
+
+            <h4>Ownership Rights</h4>
+
+            <p>The visual interfaces, graphics, design, compilation, information, data, computer code (including source code or object code), products, software, services, and all other elements of the Services (the “Materials”) provided by Myst Auth are protected by all relevant intellectual property and proprietary rights and applicable laws. All Materials contained in the Service are the property of Myst Auth or our third-party licensors. Except as expressly authorized by Myst Auth you may not make use of the Materials. Myst Auth reserves all rights to the Materials not granted expressly in this Agreement.</p>
+
+            <p>You hereby grant Myst Auth a non-exclusive, royalty-free, worldwide, transferable, irrevocable, sublicensable, and perpetual license to use or incorporate into the Services any suggestions, enhancement requests, recommendations, corrections, or other feedback (“Feedback”) you provide to Myst Auth relating to the Services.</p>
+
+            <h4>Indemnification</h4>
+
+            <p>You agree that you will be responsible for your use of the Services, and you agree to defend, indemnify, and hold harmless Myst Auth and its officers, directors, employees, consultants, subsidiaries and agents (collectively, the "Myst Auth Entities") from and against any and all claims, liabilities, damages, losses, and expenses, including reasonable attorneys' fees and costs, arising out of or in any way connected with your access to, use of, or alleged use of the Services; (ii) your violation of this Agreement or any representation, warranty, or agreements referenced herein, or any applicable law or regulation; (iii) your violation of any third-party right, including without limitation any intellectual property right, publicity, confidentiality, property or privacy right; or (iv) any disputes or issues between you and any third party. We reserve the right, at our own expense, to assume the exclusive defense and control of any matter otherwise subject to indemnification by you (and without limiting your indemnification obligations with respect to such matter), and in such case, you agree to cooperate with our defense of such claim.</p>
+
+            <h4>Disclaimers, No Warranties</h4>
+
+            <p>THE SERVICES ARE MADE AVAILABLE TO YOU ON AN "AS IS" AND "AS AVAILABLE" BASIS, WITH THE EXPRESS UNDERSTANDING THAT THE MYST AUTH ENTITIES HAVE NO OBLIGATION TO MONITOR, CONTROL, OR VET USER CONTENT OR DATA. AS SUCH, YOUR USE OF THE SERVICES IS AT YOUR OWN DISCRETION AND RISK. THE MYST AUTH ENTITIES MAKE NO CLAIMS OR PROMISES ABOUT THE QUALITY, ACCURACY, OR RELIABILITY OF THE SERVICES, ITS SAFETY OR SECURITY, OR THE SERVICES CONTENT. ACCORDINGLY, THE MYST AUTH ENTITIES ARE NOT LIABLE TO YOU FOR ANY LOSS OR DAMAGE THAT MIGHT ARISE, FOR EXAMPLE, FROM THE SERVICE'S INOPERABILITY, UNAVAILABILITY OR SECURITY VULNERABILITIES.</p>
+
+            <p>THE MYST AUTH ENTITIES EXPRESSLY DISCLAIM ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. SOME JURISDICTIONS MAY PROHIBIT A DISCLAIMER OF WARRANTIES AND YOU MAY HAVE OTHER RIGHTS THAT VARY FROM JURISDICTION TO JURISDICTION.</p>
+
+            <h4>Limitation of Liability</h4>
+
+            <p>IN NO EVENT WILL THE MYST AUTH ENTITIES BE LIABLE TO YOU OR ANY THIRD PARTY FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR PUNITIVE DAMAGES ARISING OUT OF OR RELATING TO YOUR ACCESS TO OR USE OF, OR YOUR INABILITY TO ACCESS OR USE, THE SERVICES OR ANY MATERIALS OR CONTENT ON THE SERVICES, WHETHER BASED ON WARRANTY, CONTRACT, TORT (INCLUDING NEGLIGENCE), STATUTE OR ANY OTHER LEGAL THEORY, WHETHER OR NOT THE MYST AUTH ENTITIES HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+
+            <p>YOU AGREE THAT THE AGGREGATE LIABILITY OF THE MYST AUTH ENTITIES TO YOU FOR ANY AND ALL CLAIMS ARISING OUT OF RELATING TO THE USE OF OR ANY INABILITY TO USE THE SERVICES (INCLUDING ANY MATERIALS OR CONTENT AVAILABLE THROUGH THE SERVICES) OR OTHERWISE UNDER THIS AGREEMENT, WHETHER IN CONTRACT, TORT, OR OTHERWISE, IS LIMITED TO THE AMOUNTS YOU HAVE PAID TO MYST AUTH TO ACCESS AND USE THE SERVICES IN THE 6 MONTHS PRIOR TO THE CLAIM.</p>
+
+            <p>SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF LIABILITY FOR CONSEQUENTIAL OR INCIDENTAL DAMAGES. ACCORDINGLY, THE ABOVE LIMITATION MAY NOT APPLY TO YOU.</p>
+
+            <h4>Governing Law</h4>
+
+            <p>This Agreement will be governed by the laws of the State of California without regard to conflict of law principles. To the extent that any lawsuit or court proceeding is permitted hereunder, you and Myst Auth agree to submit to the personal and exclusive jurisdiction of the state and federal courts located within Santa Clara County, California for the purpose of litigating all such disputes.</p>
+
+            <h4>Changes to these Terms</h4>
+
+            <p>Myst Auth, at its sole discretion, reserves the right to change and/or amend these Terms of Use at any time and is not obligated to provide you with advance notice. You further understand and agree that it is your sole responsibility to periodically review these Terms of Use, the latest version of which shall be available at this URL. If at any time you do not agree to these Terms of Use, you may not use the Services. Your use of the Services also serves to clearly manifest that you acknowledge and agree that the material provided in the Services is protected by law, including, but not limited to, United States copyright law and/or international treaties and other international law.</p>
+
+            <br><br>
+        </div>
+    </div>
+    <div class="content-code"></div>
+</div>
+<!-- Github Corner Ribbon - to remove (Ribbon created with : http://tholman.com/github-corners/ )-->
+<a href="https://github.com/mystsec/" target="_blank" class="github-corner" aria-label="View source on Github" title="View source on Github"><svg width="80" height="80" viewBox="0 0 250 250" style="z-index:99999; fill:#70B7FD; color:#fff; position: fixed; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}@media only screen and (max-width:680px){ .github-corner > svg { right: auto!important; left: 0!important; transform: rotate(270deg)!important;}}</style>
+<!-- END Github Corner Ribbon - to remove -->
+<script src="../static/script.js"></script>
+</body>
+</html>

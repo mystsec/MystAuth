@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
+    <title>Secured By Myst</title>
+    <style>
+        @font-face {
+        font-family: "Raleway";
+        src: url(../static/Raleway-Regular.ttf);
+        }
+
+        body {
+        font-family: 'Raleway', sans-serif;
+        font-size: large;
+        }
+
+        h1 {
+            text-decoration: none;
+            cursor: pointer;
+            text-align: center;
+            margin-top: calc(50vh - 21.5px);
+        }
+
+        h1:hover {
+            text-decoration: underline #3c91e6 2px;
+            -webkit-text-decoration: underline #3c91e6;
+            -webkit-text-decoration-thickness: 2px;
+        }
+    </style>
+  </head>
+  <body>
+    <h1 id="sec">Secured by Myst</h1>
+    <script>
+    	document.getElementById('sec').onclick = function() { window.location.href = '/'; };
+    </script>
+  </body>
+</html>
