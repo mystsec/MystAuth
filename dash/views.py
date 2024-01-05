@@ -21,7 +21,7 @@ def dash(request):
             return render(request, "dash2.html", data)
         else:
             return render(request, "dash.html", data)
-    elif 'info' in request and request.info == "Login Timed Out!":
+    elif request.info == "Login Timed Out!":
         return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&ref=https://mystauth.com/dash#login')
     else:
         return render(request, "block.html")
