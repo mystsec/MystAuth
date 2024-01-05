@@ -1,0 +1,182 @@
+:root {
+  /*dark mode colors*/
+  --top: #151515;
+  --top_text: #fff;
+  --background: #fff;
+  --contrast: #3c91e6;
+  --text: #dddce2;
+  --link: #db4d57;
+  --success: #64c832;
+  --icon: #adb5bd;
+  --btn: #3498db;
+  --btn_hover: #2980b9;
+  --border_clr: #8695ad;
+}
+
+@font-face {
+  font-family: "Raleway";
+  src: url(./Raleway-Regular.ttf);
+}
+
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+#header {
+  background-color: var(--top);
+  color: var(--top_text);
+  padding: 20px;
+}
+
+#header h1 {
+  margin: 0;
+}
+
+#hnm {
+  cursor: pointer;
+}
+
+.content {
+  font-family: 'Raleway', sans-serif;
+  font-size: large;
+  margin: 1rem;
+  padding: 1rem;
+  height: calc(100vh - 232px);
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  border-radius: 15px 15px 15px 15px;
+  border-color: var(--border_clr);
+  background-color: var(--background);
+  overflow-y: scroll;
+}
+
+.content h1 {
+  font-size: 1.5rem;
+  margin-inline: 1rem;
+}
+
+.content p {
+  margin-inline: 1rem;
+}
+
+#api_key {
+  margin-right: 2rem;
+}
+
+.content form {
+  text-align: center;
+}
+
+.content form p {
+  margin-bottom: 0px;
+}
+
+.content form input {
+  text-align: center;
+  margin: 0 auto;
+  margin-block: 1.5rem;
+  display: block;
+  padding-block: 0.3rem;
+  font-size: 1.2rem;
+  width: 250px;
+  border: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: var(--border_clr);
+}
+
+.content form button {
+  text-align: center;
+  margin: 0 auto;
+  margin-block: 1.5rem;
+  padding-block: 0.3rem;
+  font-size: 1.2rem;
+  width: 250px;
+  display: block;
+  background-color: var(--btn);
+  border: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: var(--border_clr);
+  color: var(--btn_text);
+  cursor: pointer;
+}
+
+.content form button:hover {
+  background-color: var(--btn_hover);
+}
+
+.content form button img {
+  width: 20px;
+  vertical-align: middle;
+  height: 20px;
+}
+
+#data p strong {
+  color: var(--link);
+}
+
+#data button {
+  margin: 0 auto;
+  margin-block: 1.5rem;
+  padding-block: 0.3rem;
+  font-size: 1.2rem;
+  width: 250px;
+  display: block;
+  background-color: var(--btn);
+  border: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: var(--border_clr);
+  color: var(--btn_text);
+  cursor: pointer;
+}
+
+#data button:hover {
+  background-color: var(--btn_hover);
+}
+
+#notif[success="false"] {
+  color: var(--link);
+}
+
+#notif[success="true"] {
+  color: var(--success);
+}
+
+footer {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  margin-top: auto;
+  padding-block: 1.5rem;
+  background-color: var(--top);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.footer-el {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  color: var(--top_text);
+  padding-inline: 1.5rem;
+  padding-block: 1rem;
+}
+
+.footer-el:hover {
+  text-decoration: underline;
+}
+
+.footer-el-l {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  color: var(--top_text);
+  padding-inline: 1rem;
+  padding-block: 1rem;
+}
