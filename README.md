@@ -1,4 +1,4 @@
-# MystAuth
+# Myst Auth
 Easily add passkey authentication to your web app with [Myst Auth](https://mystauth.com).
 
 Read our docs at <https://mystauth.com/docs>!
