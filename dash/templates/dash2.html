@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Myst Auth Account Dashboard</title>
+    <link rel="stylesheet" href="../static/dash2.css" />
+    <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
+    <link rel="canonical" href="https://mystauth.com/dash/">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div id="header">
+      <h1 id="hnm">Myst</h1>
+    </div>
+
+    <div class="content">
+        <h1>Account/API Management:</h1>
+        <p>API Id: <code id="id">{{ id }}</code></p>
+        <p>RID: <code>{{ rid }}</code></p>
+        <p>Base Auth Link: <code>https://mystauth.com/auth/?rid={{ rid }}&ref=</code></p>
+        <p># of User Accounts: <code>{{ userCount }}</code></p>
+        <p># of Remaining API Tokens: <code>{{ apiTokens }}</code></p>
+        <p>Contact for more API Tokens.</p>
+        <p><a href="/docs" target="_blank">Read the Myst Auth API Docs</a></p>
+        <hr>
+        <p>Edit Settings:</p>
+        <form id="edit-form">
+            {% csrf_token %}
+            <p>Origin (Hostname of URL you own): </p><input id="oid" type="text" value="{{ oid }}" autocomplete="off">
+            <p>Auth Token TTL (Int in Seconds): </p><input id="ttl" type="text" value="{{ ttl }}" autocomplete="off">
+            <p>Biometric Passkeys Only (<code>True</code>/<code>False</code>): </p><input id="bioOnly" type="text" value="{{ bioOnly }}" autocomplete="off">
+            <p>API Key:</p><input id="key" type="password" placeholder="Enter API Key to Edit" autocomplete="off">
+            <button id="submit">Update</button>
+        </form>
+        <p id="edit-notif" class="notif"></p>
+        <hr>
+        <p>Cycle API Key:</p>
+        <p>If your API Key has been compromised, cycle to generate a new API Key and remove the existing one.</p>
+        <form id="key-form">
+            <p>API Key:</p><input id="old-key" type="password" placeholder="Enter API Key to Cycle" autocomplete="off">
+            <button>Cycle</button>
+        </form>
+        <p id="cyc-notif" class="notif"></p>
+        <div id="new-creds" hidden="none">
+            <p>API Key: <code id="new-key"></code></p>
+            <p><strong>IMPORTANT:</strong> You will not be able to access your API Key through this dashboard again. Store it securely!</p>
+        </div>
+        <p>If you lost your old API Key, contact us with proof of ownership of your Origin.</p>
+        <hr>
+        <p>Delete Account:</p>
+        <p>Deletes your API account, but not your passkey login. Once deleted, you will be redirected to the First Time Setup page.</p>
+        <form id="del-form">
+            <p>API Key:</p><input id="del-key" type="password" placeholder="Enter API Key to Delete" autocomplete="off">
+            <button>Delete</button>
+        </form>
+        <p id="del-notif" class="notif"></p>
+    </div>
+
+    <p hidden="none" id="usr">{{ usr }}</p>
+    <p hidden="none" id="token">{{ auth_token }}</p>
+
+    <footer>
+      <a href="../privacy" target="_blank" class="footer-el">Privacy Policy</a>
+      <a href="../terms" target="_blank" class="footer-el">Terms of Use</a>
+      <a href="mailto:contact@mystauth.com" class="footer-el">contact@mystauth.com</a>
+    </footer>
+    <script src="../static/dash2.js"></script>
+  </body>
+</html>

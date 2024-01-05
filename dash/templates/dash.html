@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Myst Auth Account Dashboard</title>
+    <link rel="stylesheet" href="../static/dash.css" />
+    <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
+    <link rel="canonical" href="">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div id="header">
+      <h1 id="hnm">Myst</h1>
+    </div>
+
+    <div class="content">
+        <h1>Account/API First Time Setup:</h1>
+
+        <div id="input">
+            <p>To create get an API key to use the Myst Auth API, please enter the "Origin" of your web app. The "Origin" is the URL Hostname (includes subdomain and domain, but not scheme or params) of your app. You must own this domain to use Myst Auth with its Origin. The Origin field is editable so don't worry if you input the wrong subdomain right now. For more information about what to input as the Hostname of your app's URL, <a href="" target="_blank">read our API docs</a>.</p>
+
+            <form id="reg-form">
+                {% csrf_token %}
+                <input id="oid" type="text" placeholder="Enter Origin">
+                <p>By clicking the Generate button, you affirm that you agree to our <a href="/terms" target="_blank">Terms of Use</a> contract.</p>
+                <button id="submit">Generate API Key</button>
+            </form>
+            <p id="notif"></p>
+        </div>
+
+        <div hidden="none" id="data">
+            <p>Account Created!</p>
+            <p>API Id: <code id="api_id"></code></p>
+            <p>API Key: <code id="api_key"></code></p>
+            <p><strong>IMPORTANT:</strong> You will not be able to access your API Key through this dashboard again. Store it securely!</p>
+            <p>Base Auth Link: <code id="api_link"></code></p>
+            <p>This Auth Link must be used with a "ref" parameter following the requirements listed in the <a href="/docs" target="_blank">API docs</a>.</p>
+            <br><p>You are now ready to add Myst Auth to your app! Our <a href="/docs" target="_blank">API docs</a> will guide your through the simple steps. Once you go to your Dashboard (be sure to securely store your API Key first), you will be able to access and change your API Settings.</p>
+            <p>Happy Coding 💻!</p>
+
+            <button onclick="window.location.reload();">Continue to Account Dashboard</button>
+        </div>
+
+    </div>
+
+    <p hidden="none" id="usr">{{ usr }}</p>
+    <p hidden="none" id="token">{{ auth_token }}</p>
+
+    <footer>
+      <a href="../privacy" target="_blank" class="footer-el">Privacy Policy</a>
+      <a href="../terms" target="_blank" class="footer-el">Terms of Use</a>
+      <a href="mailto:contact@mystauth.com" class="footer-el">contact@mystauth.com</a>
+    </footer>
+    <script src="../static/dash.js"></script>
+  </body>
+</html>
