@@ -16,7 +16,7 @@
         <h1>Account/API First Time Setup:</h1>
 
         <div id="input">
-            <p>To create get an API key to use the Myst Auth API, please enter the "Origin" of your web app. The "Origin" is the URL Hostname (includes subdomain and domain, but not scheme or params) of your app. You must own this domain to use Myst Auth with its Origin. The Origin field is editable so don't worry if you input the wrong subdomain right now. For more information about what to input as the Hostname of your app's URL, <a href="" target="_blank">read our API docs</a>.</p>
+            <p>To get an API key to add Myst Auth to your site, please enter the "Origin" of your web app. The "Origin" is the URL Hostname (includes subdomain and domain, but not scheme or params) of your app. You must own this domain to use Myst Auth with its Origin. The Origin field is editable so don't worry if you input the wrong subdomain right now. For more information about what to input as the Hostname of your app's URL, <a href="https://mystauth.com/docs/#api-settings" target="_blank">read our API docs</a>.</p>
 
             <form id="reg-form">
                 {% csrf_token %}
@@ -46,8 +46,8 @@
     <p hidden="none" id="token">{{ auth_token }}</p>
 
     <footer>
-      <a href="../privacy" target="_blank" class="footer-el">Privacy Policy</a>
-      <a href="../terms" target="_blank" class="footer-el">Terms of Use</a>
+      <a href="/privacy" target="_blank" class="footer-el">Privacy Policy</a>
+      <a href="/terms" target="_blank" class="footer-el">Terms of Use</a>
       <a href="mailto:contact@mystauth.com" class="footer-el">contact@mystauth.com</a>
     </footer>
     <script src="../static/dash.js"></script>
