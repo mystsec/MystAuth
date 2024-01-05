@@ -5,6 +5,10 @@ var csrftoken = document.querySelector("input[name='csrfmiddlewaretoken']").valu
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 
+document.getElementById('hnm').onclick = function() {
+  window.open('/');
+};
+
 window.onload = function() {
   urlParams.set("token", document.getElementById("token").innerHTML);
   let url = window.location.pathname + '?' + urlParams.toString() + window.location.hash;
