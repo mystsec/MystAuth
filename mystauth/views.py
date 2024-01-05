@@ -241,7 +241,7 @@ def editOrigin(request):
         usr = body['usr']
         token = body['token']
 
-        auth2 = authenticateToken("mystauth.com", usr, token)
+        auth2 = authenticateToken("mystauth.com", usr, token, auth[2])
         print(auth2)
         if auth2['success']:
             newOid = body['oid']
@@ -276,7 +276,7 @@ def cycleAPI(request):
         usr = body['usr']
         token = body['token']
 
-        auth2 = authenticateToken("mystauth.com", usr, token)
+        auth2 = authenticateToken("mystauth.com", usr, token, auth[2])
         if auth2['success']:
             uuid = secrets.token_hex(64)
             salt = secrets.token_bytes(64)
@@ -305,7 +305,7 @@ def delAPI(request):
         usr = body['usr']
         token = body['token']
 
-        auth2 = authenticateToken("mystauth.com", usr, token)
+        auth2 = authenticateToken("mystauth.com", usr, token, auth[2])
         if auth2['success']:
             Origin.objects.get(oid=oid).delete()
             Acc.objects.get(user=usr, oid=oid).delete()
@@ -334,7 +334,8 @@ def delAccount(request):
             hash = getattr(token, 'hash')
             ot = getattr(token, 'timestamp')
             ttl = getattr(token, 'ttl')
-            ct = datetime.datetime.now().replace(tzinfo=pytz.UTC)
+            pst = pytz.timezone('America/Los_Angeles')
+            ct = pst.localize(datetime.datetime.now())
             td = ct - ot
             hashed = PBKDF2_HASH(salt, key)
             authCheck = str(hashed) == str(hash)
@@ -365,8 +366,9 @@ def authenticate(id, uuid):
     hash = getattr(get, 'uuid')
     salt = getattr(get, 'salt')
     oid = getattr(get, 'oid')
+    ttl = getattr(get, 'ttl')
     hashed = PBKDF2_HASH(salt, uuid)
-    return [str(hashed) == str(hash), oid]
+    return [str(hashed) == str(hash), oid, ttl]
 
 @csrf_exempt
 def verifyToken(request):
@@ -378,14 +380,14 @@ def verifyToken(request):
         usr = body['usr']
         key = body['token']
         oid = auth[1]
-        return JsonResponse(authenticateToken(oid, usr, key), safe=False)
+        return JsonResponse(authenticateToken(oid, usr, key, auth[2]), safe=False)
     else:
         return JsonResponse({'success': False, 'info': 'API Authentication Failed!'}, safe=False)
 
 #Authenticates Auth Token
-def authenticateToken(oid, usr, key):
+def authenticateToken(oid, usr, key, ottl):
     try:
-        origin = Origin.objects.get(oid=oid)
+        #origin = Origin.objects.get(oid=oid)
         token = Token.objects.get(user=usr, oid=oid)
         salt = getattr(token, 'salt')
         hash = getattr(token, 'hash')
@@ -400,7 +402,7 @@ def authenticateToken(oid, usr, key):
         if authCheck:
             if timeCheck:
                 token.delete()
-                newToken = generateToken(oid, usr, origin.ttl)
+                newToken = generateToken(oid, usr, ottl)
                 return {'success': True, 'token': newToken}
             else:
                 token.delete()
@@ -416,7 +418,7 @@ def newOriginAPI(request):
     nOid = body['nOid']
     usr = body['usr']
     token = body['token']
-    auth = authenticateToken("mystauth.com", usr, token)
+    auth = authenticateToken("mystauth.com", usr, token, 3600)
     if auth['success']:
         if 'ttl' in body and 'bioOnly' in body:
             ttl = body['ttl']
