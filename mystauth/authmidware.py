@@ -31,15 +31,22 @@ class MystAuthMiddleware:
             auth = requests.post(myst_endpoint, json=myst_params)  #make API call, pass params
             auth = auth.json()  #get json
 
+            #getOrigin = Origin.objects.get(uid = myst_id)
+            #oid = getOrigin.oid
+
+            #auth = authenticateToken(oid, user, token)
+
             authenticated = auth['success']  #gets 'success' field from json
 
             if authenticated:  #checks if 'success': true, token was verified
                 request.authenticated = True  #sets request param 'authenticated' to True
                 request.token = auth['token']  #sets request param 'token' to the new token from the API call json
+                request.info = "Success"
             else:
                 request.authenticated = False #sets request param 'authenticated' to False
                 request.info = auth['info']
         else:
             request.authenticated = False #sets request param 'authenticated' to False
+            request.info = "N/A"
 
         return self.get_response(request)  #returns authenticated request to views.py in Django (the page's controller function)
