@@ -391,7 +391,8 @@ def authenticateToken(oid, usr, key):
         hash = getattr(token, 'hash')
         ot = getattr(token, 'timestamp')
         ttl = getattr(token, 'ttl')
-        ct = datetime.datetime.now().replace(tzinfo=pytz.UTC)
+        pst = pytz.timezone('America/Los_Angeles')
+        ct = pst.localize(datetime.datetime.now())
         td = ct - ot
         hashed = PBKDF2_HASH(salt, key)
         authCheck = str(hashed) == str(hash)
