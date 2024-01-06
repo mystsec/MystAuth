@@ -40,7 +40,7 @@
         <div id="auth_form_container">
             <form id="auth_form">
                 {% csrf_token %}
-                <input id="usr" type="text" placeholder="Enter Username">
+                <input id="usr" type="text" placeholder="Enter Username" value="{{ usr }}">
                 <button id="submit" style="background">Create Account</button>
             </form>
             <p id="notif"></p>
