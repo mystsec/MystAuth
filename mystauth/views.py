@@ -69,6 +69,8 @@ def originAuth(request):
                     data['clr'] = request.GET.get('clr')
                 if 'hovclr' in request.GET:
                     data['hovclr'] = request.GET.get('hovclr')
+                if 'usr' in request.GET:
+                    data['usr'] = request.GET.get('usr')
                 return render(request, 'originAuth.html', data)
             else:
                 return render(request, 'block.html')
