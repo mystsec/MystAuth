@@ -287,6 +287,10 @@ class MystAuthMiddleware:
                     <td>The redirect url where the user should be directed after being authenticated. Must use HTTPS and match the origin registered with your API account. If your redirect url itself contains url parameters, it must be URL Encoded (in JS using <code class="higlighted break-word">encodeURIComponent()</code>) for those params to be properly passed. Otherwise, the url does not need to be encoded, but should be the last parameter.</td>
                 </tr>
                 <tr>
+                    <td>usr</td>
+                    <td>(Optional) Username to be pre-filled in the login form. Meant to be used for cases such as Auth Token timeouts where the user is known and must be directed to the Myst Auth login page to re-authenticate. Note: This parameter should only be used in conjunction with the <code class="higlighted break-word">#login</code> parameter appended to the url (learn more below).</td>
+                </tr>
+                <tr>
                     <td>img</td>
                     <td>(Optional) ID of image to be set as background image. See below for list of available IDs and images.</td>
                 </tr>
@@ -307,7 +311,9 @@ class MystAuthMiddleware:
 
             <br><p>The <code class="higlighted break-word">img</code>, <code class="higlighted break-word">bgclr</code>, <code class="higlighted break-word">clr</code>, and <code class="higlighted break-word">hovclr</code> parameters were added to Myst Auth to help you convey your website's theme on the Myst Auth page UI and give your user's a more familiar experience. Contact us if you want to add custom branding to your Auth Link.</p>
 
-            <p>Additionally, if you are using an Auth Link for a login button (you know the user has an account), you can append the <code class="higlighted break-word">#login</code> url hash parameter so the UI will show the login option first. Putting these options together, here is an example Auth Link with a background image and setting the login tab to be shown first:</p>
+            <p>Additionally, if you are using an Auth Link for a login button (you know the user has an account), you can append the <code class="higlighted break-word">#login</code> url hash parameter so the UI will show the login option first. And, if you know the user's username (ex. you are redirecting them to login after a session timeout), you can use the <code class="higlighted break-word">usr</code> param so that the user doesn't need to enter it themselves.</p>
+            
+            <p>Putting these options together, here is an example Auth Link with a background image and setting the login tab to be shown first:</p>
 
             <p><code class="higlighted break-word">https://mystauth.com/auth/?rid=00000000000000000000000000000000&img=RdELgb1bNz8&ref=https%3A%2F%2Fexample.com%2Fdashboard%2F%3Fa%3D1%26b%3D2#login</code></p>
 
