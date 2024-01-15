@@ -62,15 +62,21 @@ def originAuth(request):
             if getOrigin.apiTokens != 0:
                 data = {'bioOnly': str(getOrigin.bioOnly)}
                 if 'img' in request.GET:
-                    data['img'] = request.GET.get('img')
+                    data['img'] = re.sub(r'[^a-zA-Z0-9_-]', '', request.GET.get('img'))
                 elif 'bgclr' in request.GET:
-                    data['bgclr'] = request.GET.get('bgclr')
+                    data['bgclr'] = re.sub(r'[^a-zA-Z0-9]', '', request.GET.get('bgclr'))
                 if 'clr' in request.GET:
-                    data['clr'] = request.GET.get('clr')
+                    data['clr'] = re.sub(r'[^a-zA-Z0-9]', '', request.GET.get('clr'))
                 if 'hovclr' in request.GET:
-                    data['hovclr'] = request.GET.get('hovclr')
+                    data['hovclr'] = re.sub(r'[^a-zA-Z0-9]', '', request.GET.get('hovclr'))
                 if 'usr' in request.GET:
-                    data['usr'] = request.GET.get('usr')
+                    data['usr'] = re.sub(r'[^a-zA-Z0-9_-]', '', request.GET.get('usr'))
+                if 'rst' in request.GET:
+                    rst = request.GET.get('rst')
+                    rurl = urlparse(unquote(rst))
+                    if rurl.hostname == oid:
+                        data['reset'] = re.sub(r'[^a-zA-Z0-9_%/:#&=?.-]', '', rst)
+                data['ref'] = re.sub(r'[^a-zA-Z0-9_%/:#&=?.-]', '', ref)
                 return render(request, 'originAuth.html', data)
             else:
                 return render(request, 'block.html')
@@ -112,7 +118,7 @@ def userRegOpts(request):
 
         regOpts = generate_registration_options(
             rp_id="mystauth.com",
-            rp_name="Myst Auth",
+            rp_name="Myst Auth - "+oid,
             user_id=uuid,
             user_name=username,
             user_display_name=username,
