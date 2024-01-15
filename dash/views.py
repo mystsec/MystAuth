@@ -25,4 +25,4 @@ def dash(request):
         usr = request.GET.get('usr')
         return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr='+usr+'&ref=https://mystauth.com/dash#login')
     else:
-        return render(request, "block.html")
+        return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&ref=https://mystauth.com/dash#login')
