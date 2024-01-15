@@ -56,6 +56,10 @@ editForm.addEventListener('submit', async function(e) {
           {
             console.log("Auth Failed");
           }
+          if (data['info'].includes("Time"))
+          {
+            window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr="+usr+"&ref=https://mystauth.com/dash#login";
+          }
         }
       });
   }
@@ -97,6 +101,10 @@ cycForm.addEventListener('submit', async function(e) {
           {
             console.log("Auth Failed");
           }
+          if (data['info'].includes("Time"))
+          {
+            window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr="+usr+"&ref=https://mystauth.com/dash#login";
+          }
         }
       });
   }
@@ -137,6 +145,10 @@ delForm.addEventListener('submit', async function(e) {
           else
           {
             console.log("Auth Failed");
+          }
+          if (data['info'].includes("Time"))
+          {
+            window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr="+usr+"&ref=https://mystauth.com/dash#login";
           }
         }
       });
