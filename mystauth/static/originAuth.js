@@ -3,6 +3,8 @@ var csrftoken = document.querySelector("input[name='csrfmiddlewaretoken']").valu
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const rid = urlParams.get('rid');
+const refLink = document.getElementById("ref").innerHTML;
+const rstLink = prepURL(document.getElementById("reset").innerHTML);
 
 window.onload = async function() {
   if (window.location.hash == "#login")
@@ -97,7 +99,7 @@ form.addEventListener('submit', async function(e) {
 
                         if (urlParams.has('ref'))
                         {
-                          let ref = decodeURIComponent(urlParams.get('ref'));
+                          let ref = prepURL(refLink);
                           if (ref.includes("?"))
                           {
                             ref = ref + "&usr="+usr+"&token="+data2[1];
@@ -204,7 +206,7 @@ form.addEventListener('submit', async function(e) {
 
                       if (urlParams.has('ref'))
                       {
-                        let ref = decodeURIComponent(urlParams.get('ref'));
+                        let ref = prepURL(refLink);
                         if (ref.includes("?"))
                         {
                           ref = ref + "&usr="+usr+"&token="+data2[1];
@@ -241,7 +243,9 @@ form.addEventListener('submit', async function(e) {
 });
 
 async function select(id) {
-  let support = await checkSupport()
+  let support = await checkSupport();
+  let reset = document.getElementById("reset").innerHTML.length > 0;
+  let resetCont = document.getElementById("reset_container");
   if (support)
   {
     var elements = document.querySelectorAll('[name="selection"]');
@@ -251,6 +255,7 @@ async function select(id) {
     document.getElementById(id).setAttribute("aria-selected", "true");
     document.getElementById('notif').innerHTML = '';
     if (id === "signup") {
+      resetCont.setAttribute("hidden", "none");
       document.getElementById("submit").innerHTML = "Create Account";
       document.getElementById("loading_msg").innerHTML = "Use Device to Create . . .";
       //document.getElementById("loading_msg").innerHTML = "Use USB Security Key . . .";
@@ -258,6 +263,11 @@ async function select(id) {
     else {
       document.getElementById("submit").innerHTML = "Log In with Passkey";
       document.getElementById("loading_msg").innerHTML = "Authenticate Using Device . . .";
+      if (reset)
+      {
+        document.getElementById("reset_link").setAttribute("href", rstLink);
+        resetCont.removeAttribute("hidden");
+      }
     }
   }
   else
@@ -268,7 +278,7 @@ async function select(id) {
     });
     document.getElementById(id).setAttribute("aria-selected", "true");
     document.getElementById('notif').innerHTML = '';
-    document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys-work/' target='_blank'>Passkeys</a> 😢 <br><br><a href='https://passkeys.dev/device-support/#matrix' target='_blank'>Check Support</a>";
+    document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys>
     loading();
   }
 }
@@ -322,6 +332,12 @@ function loaded() {
 function onlySpaces(str)
 {
   return str.replace(/\s/g, '').length == 0;
+}
+
+function prepURL(url)
+{
+  url = decodeURIComponent(url);
+  return url.replace(/"/g, "%22").replace(/'/g, "%27").replace(/</g, "%3C").replace(/>/g, "%3E");
 }
 
 /*
