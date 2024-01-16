@@ -24,6 +24,8 @@ from webauthn.helpers.structs import (
 )
 import secrets
 import hashlib
+import fastpbkdf2
+import argon2
 import os
 import base64
 import uuid
@@ -289,7 +291,7 @@ def cycleAPI(request):
             uuid = secrets.token_hex(64)
             salt = secrets.token_bytes(64)
             hash = ''
-            hash = PBKDF2_HASH(salt, uuid)
+            hash = HASH(salt, uuid)
 
             origin = Origin.objects.get(oid=oid)
             origin.uuid = hash
@@ -345,7 +347,7 @@ def delAccount(request):
             pst = pytz.timezone('America/Los_Angeles')
             ct = pst.localize(datetime.datetime.now())
             td = ct - ot
-            hashed = PBKDF2_HASH(salt, key)
+            hashed = HASH(salt, key)
             authCheck = str(hashed) == str(hash)
             timeCheck = td.seconds < ttl
             if authCheck:
@@ -375,7 +377,7 @@ def authenticate(id, uuid):
     salt = getattr(get, 'salt')
     oid = getattr(get, 'oid')
     ttl = getattr(get, 'ttl')
-    hashed = PBKDF2_HASH(salt, uuid)
+    hashed = HASH(salt, uuid)
     return [str(hashed) == str(hash), oid, ttl]
 
 @csrf_exempt
@@ -404,7 +406,7 @@ def authenticateToken(oid, usr, key, ottl):
         pst = pytz.timezone('America/Los_Angeles')
         ct = pst.localize(datetime.datetime.now())
         td = ct - ot
-        hashed = PBKDF2_HASH(salt, key)
+        hashed = HASH(salt, key)
         authCheck = str(hashed) == str(hash)
         timeCheck = td.seconds < ttl
         if authCheck:
@@ -457,7 +459,7 @@ def newOrigin(oid, ttl=3600, bio_only=False):
     uuid = secrets.token_hex(64)
     salt = secrets.token_bytes(64)
     hash = ''
-    hash = PBKDF2_HASH(salt, uuid)
+    hash = HASH(salt, uuid)
     uid = getUUIDStr()
     while Origin.objects.filter(uid=uid).exists():
         uid = getUUIDStr()
@@ -480,12 +482,43 @@ def getUUIDHex():
 def getRandomBytes(s):
     return os.urandom(s)
 
+def HASH(salt, plain, fct=1):
+    if fct == 0:
+        return PBKDF2_HASH(salt, plain)
+    elif fct == 1:
+        return PBKDF2_HASH_FAST(salt, plain)
+    elif fct == 2:
+        return PBKDF2_HASH_FAST_HEX(salt, plain)
+    elif fct == 3:
+        return ARGON2ID_HASH(salt, plain)
+    else:
+        return PBKDF2_HASH(salt, plain)
+
 def PBKDF2_HASH(salt, plain):
     plain = plain.encode('utf-8')
     if isinstance(salt, str):
         salt = str2bytes(salt)
     hashed = hashlib.pbkdf2_hmac('sha512', plain, salt, 1000000)
     return base64.b64encode(hashed)
+
+def PBKDF2_HASH_FAST(salt, plain):
+    if isinstance(salt, str):
+            salt = eval(salt)
+    hashed = fastpbkdf2.pbkdf2_hmac('sha512', plain.encode('utf-8'), salt, 1000000)
+    hashed = base64.b64encode(hashed)
+    return hashed
+
+def PBKDF2_HASH_FAST_HEX(salt, plain):
+    if isinstance(salt, str):
+            salt = eval(salt)
+    hashed = fastpbkdf2.pbkdf2_hmac('sha512', plain.encode('utf-8'), salt, 1000000).hex()
+    return hashed
+
+def ARGON2ID_HASH(salt, plain):
+    if isinstance(salt, str):
+            salt = eval(salt)
+    hashed = argon2.low_level.hash_secret_raw(plain.encode('utf-8'), salt, time_cost=50, memory_cost=10000, parallelism=2, hash_len=64, type=argon2.low_level.Type.ID).hex()
+    return hashed
 
 def str2bytes(byte_string):
     return eval(byte_string)
@@ -494,7 +527,7 @@ def generateToken(oid, usr, ttl=120):
     Token.objects.filter(user=usr, oid=oid).delete()
     uuid = secrets.token_hex(64)
     salt = secrets.token_bytes(64)
-    hash = PBKDF2_HASH(salt, uuid)
+    hash = HASH(salt, uuid)
     token = Token(oid=oid, user=usr, hash=hash, salt=salt, ttl=ttl)
     token.save()
     return uuid
