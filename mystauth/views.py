@@ -469,7 +469,6 @@ def newOrigin(oid, ttl=3600, bio_only=False):
     auth = Origin(uid = uid, uuid = hash, salt = salt, rid = rid, oid = oid, ttl = ttl, bioOnly = bio_only)
     auth.save()
     result = {'success': True, 'id': uid, 'apiKey': uuid, 'reqId': rid}
-    print(result)
     return result
 
 #Helper Fcts
