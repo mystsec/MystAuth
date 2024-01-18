@@ -252,12 +252,10 @@ def editOrigin(request):
         token = body['token']
 
         auth2 = authenticateToken("mystauth.com", usr, token, auth[2])
-        print(auth2)
         if auth2['success']:
             newOid = body['oid']
             ttl = body['ttl']
             bioOnly = body['bioOnly'] == "True"
-            print(bioOnly)
             if oid != newOid and Origin.objects.filter(oid=newOid).exists():
                 result = {'success': False, 'info': 'Origin already taken!', 'token': auth2['token']}
             else:
