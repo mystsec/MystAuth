@@ -19,6 +19,8 @@ class Origin(models.Model):
     salt = models.TextField()
     ttl = models.PositiveBigIntegerField(default=3600) #seconds
     bioOnly = models.BooleanField(default=False)
+    allowReset = models.BooleanField(default=False)
+    hashFct = models.PositiveBigIntegerField(default=1)
     userCount = models.PositiveBigIntegerField(default=0)
     apiTokens = models.PositiveBigIntegerField(default=100)
     #ips = jsonfield.JSONField(blank=True)
