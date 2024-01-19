@@ -4,8 +4,8 @@ from django.db import models
 class Auth(models.Model):
     user = models.TextField(editable=False)
     uid = models.TextField(editable=False) #unique
-    credId = models.TextField(editable=False)
-    pbk = models.TextField(editable=False)
+    credId = models.TextField()
+    pbk = models.TextField()
     challenge = models.TextField()
     signCount = models.PositiveBigIntegerField(default=0)
     oid = models.TextField(editable=False, default="None")
