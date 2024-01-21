@@ -9,7 +9,7 @@
     <link rel="preload" href="../static/originAuth.css" as="style">
     <link rel="preload" href="../static/originAuth.js" as="script">
     {% if img %}
-    <link rel="preload" href="../static/bgimages/{{ img }}.jpg" as="image">
+    <link rel="preload" href="../static/bgimages/{{ img }}.webp" as="image">
     {% endif %}
     <link rel="stylesheet" href="../static/originAuth.css">
     <style>
@@ -21,13 +21,24 @@
             --btn_hover: #{{ hovclr }};
             {% endif %}
         }
+
+        body {
+            {% if img %}
+            background-image: image-set(
+            url('../static/bgimages/{{ img }}.webp') type("image/webp"),
+            url('../static/bgimages/{{ img }}.AVIF') type("image/avif"),
+            url('../static/bgimages/{{ img }}.jpg') type("image/jpeg"));
+            background-image: -webkit-image-set(
+            url('../static/bgimages/{{ img }}.webp'),
+            url('../static/bgimages/{{ img }}.AVIF'),
+            url('../static/bgimages/{{ img }}.jpg'));
+            {% elif bgclr %}
+            background-color: #{{ bgclr }};
+            {% endif %}
+        }
     </style>
   </head>
-  {% if img %}
-  <body style="background-image: url('../static/bgimages/{{ img }}.jpg');">
-  {% elif bgclr %}
-  <body style="background-color: #{{ bgclr }};">
-  {% endif %}
+  <body>
     <div id="selector" class="selector">
         <div id="signup" name="selection" onclick="select(this.id)" aria-selected="true">
             <h1>Sign Up</h1>
@@ -48,6 +59,9 @@
         <div id="loading_container" hidden="none">
             <p id="loading_msg">Creating Secure Account . . .</p>
         </div>
+        <div id="reset_container" class="reset" hidden="none">
+            <p><a class="madeby" id="reset_link">Lost Passkey?</a></p>
+        </div>
         <div class="label">
             <p><a class="madeby" href="https://mystauth.com" target="_blank">Secured by Myst</a></p>
             <p><a class="madeby" href="https://mystauth.com/terms" target="_blank"><small>Terms</small></a> ⋅ <a class="madeby" href="https://mystauth.com/privacy" target="_blank"><small>Privacy</small></a></p>
@@ -59,6 +73,8 @@
     </div>
     {% endif %}
     <div id="bioOnly" hidden="none">{{ bioOnly }}</div>
-	<script src="../static/originAuth.js"></script>
+    <div id="ref" hidden="none">{{ ref }}</div>
+    <div id="reset" hidden="none">{{ reset }}</div>
+    <script src="../static/originAuth.js"></script>
   </body>
 </html>
