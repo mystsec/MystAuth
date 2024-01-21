@@ -16,6 +16,7 @@ def dash(request):
             data['rid'] = getOrigin.rid
             data['ttl'] = getOrigin.ttl
             data['bioOnly'] = str(getOrigin.bioOnly)
+            data['allowReset'] = str(getOrigin.allowReset)
             data['userCount'] = getOrigin.userCount
             data['apiTokens'] = getOrigin.apiTokens
             return render(request, "dash2.html", data)
