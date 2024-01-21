@@ -3,7 +3,7 @@ from .models import Origin, Auth
 
 # Register your models here.
 class OriginAdmin(admin.ModelAdmin):
-    list_display = ['oid', 'rid', 'ttl', 'bioOnly', 'userCount', 'apiTokens']
+    list_display = ['oid', 'rid', 'ttl', 'bioOnly', 'allowReset', 'userCount', 'apiTokens']
 admin.site.register(Origin, OriginAdmin)
 
 class AuthAdmin(admin.ModelAdmin):
