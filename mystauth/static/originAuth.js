@@ -13,7 +13,7 @@ window.onload = async function() {
   }
   if (! await checkSupport())
   {
-    document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys-work/' target='_blank'>Passkeys</a> 😢 <br><br><a href='https://passkeys.dev/device-support/#matrix' target='_blank'>Check Support</a>";
+    document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys-work/' target='_blank'>Passkeys<>
     loading();
   }
   console.log("%cStop!", "color: red; font-size: 3rem;");
@@ -195,7 +195,7 @@ form.addEventListener('submit', async function(e) {
                   body: JSON.stringify({'resp': cred, 'usr': usr, 'rid': rid})
               }).then(response => response.json())
                 .then(async (data2) => {
-                    console.log(data2);
+                    //console.log(data2);
                     loaded();
                     if (data2[0] == 'success')
                     {
@@ -278,7 +278,7 @@ async function select(id) {
     });
     document.getElementById(id).setAttribute("aria-selected", "true");
     document.getElementById('notif').innerHTML = '';
-    document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys>
+    document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys-work/' target='_blank'>Passkeys<>
     loading();
   }
 }
