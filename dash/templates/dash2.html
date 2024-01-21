@@ -28,6 +28,7 @@
             <p>Origin (Hostname of URL you own): </p><input id="oid" type="text" value="{{ oid }}" autocomplete="off">
             <p>Auth Token TTL (Int in Seconds): </p><input id="ttl" type="text" value="{{ ttl }}" autocomplete="off">
             <p>Biometric Passkeys Only (<code>True</code>/<code>False</code>): </p><input id="bioOnly" type="text" value="{{ bioOnly }}" autocomplete="off">
+            <p>Allow Passkey Resets (<code>True</code>/<code>False</code>): </p><input id="allowReset" type="text" value="{{ allowReset }}" autocomplete="off">
             <p>API Key:</p><input id="key" type="password" placeholder="Enter API Key to Edit" autocomplete="off">
             <button id="submit">Update</button>
         </form>
@@ -61,8 +62,9 @@
     <footer>
       <a href="/privacy" target="_blank" class="footer-el">Privacy Policy</a>
       <a href="/terms" target="_blank" class="footer-el">Terms of Use</a>
-      <a href="mailto:contact@mystauth.com" class="footer-el">contact@mystauth.com</a>
+      <a href="mailto:contact@mystauth.com" class="footer-el">Contact Email</a>
     </footer>
     <script src="../static/dash2.js"></script>
   </body>
 </html>
+
