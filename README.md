@@ -3,7 +3,7 @@ Easily add passkey authentication to your web app with [Myst Auth](https://mysta
 
 Read our docs at <https://mystauth.com/docs>!
 
-Myst Auth's source code is provided here (source available) under the [PolyForm Perimeter License](https://polyformproject.org/licenses/perimeter/1.0.1) which allows use for purposes which do not 'compete' (read license for more details) with this software. The main goal of making this code source available is to enable audits and contributions to help improve the security and functionality of Myst Auth.
+Myst Auth's source code is provided here (source available) under the [PolyForm Perimeter License](https://polyformproject.org/licenses/perimeter/1.0.1) which allows use for purposes which do not 'compete' (read license for more details) with this software. The main goal of making this code source available is to enable audits and contributions to help improve the security and functionality of Myst Auth, while striking a balance that prevents a competitor from simply copying our codebase but still allows the code to be used (for example) in education and research.
 
 Myst Auth is built using the Django Web Framework. The [`myst`](myst) folder contains the project files, including [`settings.py`](myst/settings.py). The [`mystauth`](mystauth) folder contains the app files for the Myst Auth login portal, reset portal, API, and docs. The [`dash`](dash) folder contains the app files for the Myst Auth API account dashboard, which also serves as an example app implementing Myst Auth. Security critical processes are handled in the [`crypto.py`](mystauth/crypto.py) file to improve readability and ease of updating these methods.
 
