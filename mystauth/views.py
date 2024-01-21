@@ -22,17 +22,21 @@ from webauthn.helpers.structs import (
     AuthenticationCredential,
     UserVerificationRequirement,
 )
-import secrets
-import hashlib
-import fastpbkdf2
-import argon2
+from .crypto import (
+    getUID,
+    getHashMat,
+    byTob64,
+    b64Toby,
+    HASH,
+    authenticate,
+    validateToken,
+    authenticateToken,
+    generateToken,
+    newOrigin,
+)
 import os
-import base64
-import uuid
 from urllib.parse import urlparse, unquote
 import json
-import datetime
-import pytz
 import re
 
 # Create your views here.
@@ -87,6 +91,48 @@ def originAuth(request):
     else:
         return render(request, 'block.html')
 
+def resetAuth(request):
+    if request.method == 'GET' and 'rid' in request.GET and 'ref' in request.GET and 'mc' in request.GET and 'usr' in request.GET:
+        rid = request.GET.get('rid')
+        ref = request.GET.get('ref')
+        mc = request.GET.get('mc')
+        usr = request.GET.get('usr')
+
+        try:
+            getOrigin = Origin.objects.get(rid=rid)
+            oid = getattr(getOrigin, 'oid')
+        except:
+            return render(request, 'block.html')
+
+        url = urlparse(unquote(ref))
+        origin = url.hostname
+        scheme = url.scheme
+
+        if scheme == 'https' and origin == oid:
+            auth = authenticateToken(oid, usr, mc, 600, True, True)
+            if auth['success']:
+                data = {'bioOnly': str(getOrigin.bioOnly)}
+                if 'img' in request.GET:
+                    data['img'] = re.sub(r'[^a-zA-Z0-9_-]', '', request.GET.get('img'))
+                elif 'bgclr' in request.GET:
+                    data['bgclr'] = re.sub(r'[^a-zA-Z0-9]', '', request.GET.get('bgclr'))
+                if 'clr' in request.GET:
+                    data['clr'] = re.sub(r'[^a-zA-Z0-9]', '', request.GET.get('clr'))
+                if 'hovclr' in request.GET:
+                    data['hovclr'] = re.sub(r'[^a-zA-Z0-9]', '', request.GET.get('hovclr'))
+                data['usr'] = re.sub(r'[^a-zA-Z0-9_-]', '', request.GET.get('usr'))
+                data['ref'] = re.sub(r'[^a-zA-Z0-9_%/:#&=?.-]', '', ref)
+                data['token'] = auth['token']
+                return render(request, 'resetAuth.html', data)
+            elif 'Time' in auth['info']:
+                return render(request, 'msg.html', {'msg': 'Reset Link Timed Out, Please Request a New One!'})
+            else:
+                return render(request, 'msg.html', {'msg': 'Reset Link No Longer Valid, Please Request a New One!'})
+        else:
+            return render(request, 'block.html')
+    else:
+        return render(request, 'block.html')
+
 def userRegOpts(request):
     body = json.loads(request.body.decode('utf-8'))
     username = body['usr']
@@ -101,9 +147,7 @@ def userRegOpts(request):
     if Auth.objects.filter(user=username, oid=oid).exists():
         result = ['failed', 'Username already taken!']
     else:
-        uuid = getUUIDStr()
-        while Auth.objects.filter(uid=uuid).exists():
-            uuid = getUUIDStr()
+        uuid = getUID()
 
         bioOnly = getOrigin.bioOnly
         if bioOnly:
@@ -138,6 +182,63 @@ def userRegOpts(request):
         return JsonResponse(json_dict, safe=False)
     return JsonResponse(result, safe=False)
 
+def resetRegOpts(request):
+    body = json.loads(request.body.decode('utf-8'))
+    username = body['usr']
+    rid = body['rid']
+    mc = body['mc']
+
+    if not re.match("^[a-zA-Z0-9_-]+$", username):
+        return JsonResponse(['failed', 'Only Alphanumerics, Underscore, and Hyphen Allowed in Username'], safe=False)
+
+    getOrigin = Origin.objects.get(rid=rid)
+    oid = getattr(getOrigin, 'oid')
+
+    try:
+        getUser = Auth.objects.get(user=username, oid=oid)
+    except:
+        return JsonResponse(['failed', 'Reset Link No Longer Valid, Please Request a New One!'], safe=False)
+
+    auth = authenticateToken(oid, username, mc, 180, True, True)
+
+    if auth['success']:
+        uuid = getUser.uid
+        bioOnly = getOrigin.bioOnly
+        if bioOnly:
+            auth_sel = AuthenticatorSelectionCriteria(
+                resident_key=ResidentKeyRequirement.REQUIRED,
+                user_verification=UserVerificationRequirement.PREFERRED,
+                authenticator_attachment=AuthenticatorAttachment.PLATFORM,
+            )
+        else:
+            auth_sel = AuthenticatorSelectionCriteria(
+                resident_key=ResidentKeyRequirement.REQUIRED,
+                user_verification=UserVerificationRequirement.PREFERRED,
+            )
+
+        regOpts = generate_registration_options(
+            rp_id="mystauth.com",
+            rp_name="Myst Auth - "+oid,
+            user_id=uuid,
+            user_name=username,
+            user_display_name=username,
+            attestation=AttestationConveyancePreference.DIRECT,
+            authenticator_selection=auth_sel,
+            supported_pub_key_algs=[COSEAlgorithmIdentifier.ECDSA_SHA_512, COSEAlgorithmIdentifier.ECDSA_SHA_256, COSEAlgorithmIdentifier.EDDSA, COSEAlgorithmIdentifier.RSASSA_PKCS1_v1_5_SHA_256],
+            timeout=60000,
+        )
+        json_dict = options_to_json(regOpts)
+        opt_dict = json.loads(json_dict)
+
+        getUser.challenge = opt_dict["challenge"]
+        getUser.save()
+
+        return JsonResponse([json_dict, auth['token']], safe=False)
+    elif "Time" in auth['info']:
+        return JsonResponse(['failed', 'Session Timed Out! Request New Reset Link'], safe=False)
+    else:
+        return JsonResponse(['failed', 'Reset Link No Longer Valid, Please Request a New One!'], safe=False)
+
 def userRegister(request):
     body = json.loads(request.body.decode('utf-8'))
     response = RegistrationCredential.parse_raw(json.dumps(body['resp']))
@@ -147,7 +248,6 @@ def userRegister(request):
     getUser = Auth.objects.get(uid=uid)
     eChallenge = getattr(getUser, 'challenge')
     eChallenge = base64url_to_bytes(eChallenge)
-    eChallenge = base64url_to_bytes(b64_to_b64url(byTob64(eChallenge)))
 
     try:
         reg_verification = verify_registration_response(
@@ -173,6 +273,47 @@ def userRegister(request):
     getOrigin.save()
     token = generateToken(oid, usr, 45)
     return JsonResponse(['success', token], safe=False)
+
+def resetRegister(request):
+    body = json.loads(request.body.decode('utf-8'))
+    response = RegistrationCredential.parse_raw(json.dumps(body['resp']))
+    uid = body['uid']
+    rid = body['rid']
+    mc = body['mc']
+
+    getOrigin = Origin.objects.get(rid=rid)
+    oid = getattr(getOrigin, 'oid')
+
+    getUser = Auth.objects.get(uid=uid)
+    usr = getUser.user
+
+    auth = authenticateToken(oid, usr, mc, 45, True)
+
+    if auth['success']:
+        eChallenge = getattr(getUser, 'challenge')
+        eChallenge = base64url_to_bytes(eChallenge)
+
+        try:
+            reg_verification = verify_registration_response(
+                credential=response,
+                expected_challenge=eChallenge,
+                expected_origin=f"https://{request.get_host()}",
+                expected_rp_id="mystauth.com",
+            )
+        except:
+            return JsonResponse(['failed', 'Passkey Verification Failed!'], safe=False)
+
+        cid = reg_verification.credential_id
+        pbk = reg_verification.credential_public_key
+        getUser.credId = byTob64(cid)
+        getUser.pbk = byTob64(pbk)
+        getUser.signCount = 0
+        getUser.save()
+        return JsonResponse(['success', auth['token']], safe=False)
+    elif 'Time' in auth['info']:
+        return JsonResponse(['failed', 'Session Timed Out! Request New Reset Link'], safe=False)
+    else:
+        return JsonResponse(['failed', 'Authentication Failed'], safe=False)
 
 def userAuthOpts(request):
     body = json.loads(request.body.decode('utf-8'))
@@ -216,7 +357,6 @@ def userAuthenticate(request):
     getUser = Auth.objects.get(user=username, oid=oid)
     eChallenge = getattr(getUser, 'challenge')
     eChallenge = base64url_to_bytes(eChallenge)
-    eChallenge = base64url_to_bytes(b64_to_b64url(byTob64(eChallenge)))
 
 
     pbk = getattr(getUser, 'pbk')
@@ -256,6 +396,7 @@ def editOrigin(request):
             newOid = body['oid']
             ttl = body['ttl']
             bioOnly = body['bioOnly'] == "True"
+            allowReset = body['allowReset'] == "True"
             if oid != newOid and Origin.objects.filter(oid=newOid).exists():
                 result = {'success': False, 'info': 'Origin already taken!', 'token': auth2['token']}
             else:
@@ -263,11 +404,12 @@ def editOrigin(request):
                 auth.oid = newOid
                 auth.ttl = ttl
                 auth.bioOnly = bioOnly
+                auth.allowReset = allowReset
                 auth.save()
                 getAcc = Acc.objects.get(user=usr, oid=oid)
                 getAcc.oid = newOid
                 getAcc.save()
-                result = {'success': True, 'oid': newOid, 'ttl': ttl, 'bioOnly': str(bioOnly), 'token': auth2['token']}
+                result = {'success': True, 'oid': newOid, 'ttl': ttl, 'bioOnly': str(bioOnly), 'allowReset': str(allowReset), 'token': auth2['token']}
             return JsonResponse(result, safe=False)
         else:
             return JsonResponse(auth2, safe=False)
@@ -286,17 +428,15 @@ def cycleAPI(request):
 
         auth2 = authenticateToken("mystauth.com", usr, token, auth[2])
         if auth2['success']:
-            uuid = secrets.token_hex(64)
-            salt = secrets.token_bytes(64)
-            hash = ''
-            hash = HASH(salt, uuid)
+            hashMat = getHashMat()
+            hash = HASH(hashMat["salt"], hashMat["uuid"])
 
             origin = Origin.objects.get(oid=oid)
             origin.uuid = hash
-            origin.salt = salt
+            origin.salt = hashMat["salt"]
             origin.save()
 
-            result = {'success': True, 'apiKey': uuid, 'token': auth2['token']}
+            result = {'success': True, 'apiKey': hashMat["uuid"], 'token': auth2['token']}
             return JsonResponse(result, safe=False)
         else:
             return JsonResponse(auth2, safe=False)
@@ -326,6 +466,24 @@ def delAPI(request):
         return JsonResponse({'success': False, 'info': 'API Authentication Failed!'}, safe=False)
 
 @csrf_exempt
+def newResetLink(request):
+    body = json.loads(request.body.decode('utf-8'))
+    id = body['id']
+    apiKey = body['apiKey']
+    origin = Origin.objects.get(uid=id)
+    if origin.allowReset:
+        auth = authenticate(id, apiKey)
+        if auth[0]:
+            usr = body['usr']
+            oid = auth[1]
+            mc = generateToken(oid, usr, 600, rst=True)
+            return JsonResponse({'success': True, 'mcode': mc}, safe=False)
+        else:
+            return JsonResponse({'success': False, 'info': 'API Authentication Failed!'}, safe=False)
+    else:
+        return JsonResponse({'success': False, 'info': 'allowReset set to False, change in API Account Dashboard'}, safe=False)
+
+@csrf_exempt
 def delAccount(request):
     body = json.loads(request.body.decode('utf-8'))
     id = body['id']
@@ -334,26 +492,14 @@ def delAccount(request):
     if auth[0]:
         try:
             usr = body['usr']
-            key = body['token']
             oid = auth[1]
-            origin = Origin.objects.get(oid=oid)
-            token = Token.objects.get(user=usr, oid=oid)
-            salt = getattr(token, 'salt')
-            hash = getattr(token, 'hash')
-            ot = getattr(token, 'timestamp')
-            ttl = getattr(token, 'ttl')
-            pst = pytz.timezone('America/Los_Angeles')
-            ct = pst.localize(datetime.datetime.now())
-            td = ct - ot
-            hashed = HASH(salt, key)
-            authCheck = str(hashed) == str(hash)
-            timeCheck = td.seconds < ttl
-            if authCheck:
-                if timeCheck:
+            tokenAuth = validateToken(oid, usr, body['token'])
+            token = tokenAuth['token']
+            if tokenAuth['auth_check']:
+                if tokenAuth['time_check']:
                     token.delete()
                     user = Auth.objects.get(user=usr, oid=oid).delete()
-                    getOrigin = Origin.objects.get(rid=rid)
-                    oid = getattr(getOrigin, 'oid')
+                    getOrigin = Origin.objects.get(oid=oid)
                     getOrigin.userCount = getOrigin.userCount - 1
                     getOrigin.apiTokens = getOrigin.apiTokens + 1
                     getOrigin.save()
@@ -368,16 +514,6 @@ def delAccount(request):
     else:
         return JsonResponse({'success': False, 'info': 'API Authentication Failed!'}, safe=False)
 
-#Authenticates Origin Key
-def authenticate(id, uuid):
-    get = Origin.objects.get(uid = id)
-    hash = getattr(get, 'uuid')
-    salt = getattr(get, 'salt')
-    oid = getattr(get, 'oid')
-    ttl = getattr(get, 'ttl')
-    hashed = HASH(salt, uuid)
-    return [str(hashed) == str(hash), oid, ttl]
-
 @csrf_exempt
 def verifyToken(request):
     body = json.loads(request.body.decode('utf-8'))
@@ -391,34 +527,6 @@ def verifyToken(request):
         return JsonResponse(authenticateToken(oid, usr, key, auth[2]), safe=False)
     else:
         return JsonResponse({'success': False, 'info': 'API Authentication Failed!'}, safe=False)
-
-#Authenticates Auth Token
-def authenticateToken(oid, usr, key, ottl):
-    try:
-        #origin = Origin.objects.get(oid=oid)
-        token = Token.objects.get(user=usr, oid=oid)
-        salt = getattr(token, 'salt')
-        hash = getattr(token, 'hash')
-        ot = getattr(token, 'timestamp')
-        ttl = getattr(token, 'ttl')
-        pst = pytz.timezone('America/Los_Angeles')
-        ct = pst.localize(datetime.datetime.now())
-        td = ct - ot
-        hashed = HASH(salt, key)
-        authCheck = str(hashed) == str(hash)
-        timeCheck = td.seconds < ttl
-        if authCheck:
-            if timeCheck:
-                token.delete()
-                newToken = generateToken(oid, usr, ottl)
-                return {'success': True, 'token': newToken}
-            else:
-                token.delete()
-                return {'success': False, 'info': 'Login Timed Out!'}
-        else:
-            return {'success': False, 'info': 'Authentication Failed!'}
-    except:
-        return {'success': False, 'info': 'Authentication Failed!'}
 
 def newOriginAPI(request):
     body = json.loads(request.body.decode('utf-8'))
@@ -450,99 +558,3 @@ def newOriginAPI(request):
         result = {'success': False, 'info': auth['info']}
     return JsonResponse(result, safe=False)
 
-#Generates new Origin
-def newOrigin(oid, ttl=3600, bio_only=False):
-    if Origin.objects.filter(oid=oid).exists():
-        return {'success': False, 'info': 'Origin already taken! If you own this origin, please contact us.'}
-    uuid = secrets.token_hex(64)
-    salt = secrets.token_bytes(64)
-    hash = ''
-    hash = HASH(salt, uuid)
-    uid = getUUIDStr()
-    while Origin.objects.filter(uid=uid).exists():
-        uid = getUUIDStr()
-    rid = getUUIDHex()
-    while Origin.objects.filter(rid=rid).exists():
-        rid = getUUIDHex()
-    auth = Origin(uid = uid, uuid = hash, salt = salt, rid = rid, oid = oid, ttl = ttl, bioOnly = bio_only)
-    auth.save()
-    result = {'success': True, 'id': uid, 'apiKey': uuid, 'reqId': rid}
-    return result
-
-#Helper Fcts
-def getUUIDStr():
-    return str(uuid.uuid4())
-
-def getUUIDHex():
-    return uuid.uuid4().hex
-
-def getRandomBytes(s):
-    return os.urandom(s)
-
-def HASH(salt, plain, fct=1):
-    if fct == 0:
-        return PBKDF2_HASH(salt, plain)
-    elif fct == 1:
-        return PBKDF2_HASH_FAST(salt, plain)
-    elif fct == 2:
-        return PBKDF2_HASH_FAST_HEX(salt, plain)
-    elif fct == 3:
-        return ARGON2ID_HASH(salt, plain)
-    else:
-        return PBKDF2_HASH(salt, plain)
-
-def PBKDF2_HASH(salt, plain):
-    plain = plain.encode('utf-8')
-    if isinstance(salt, str):
-        salt = str2bytes(salt)
-    hashed = hashlib.pbkdf2_hmac('sha512', plain, salt, 1000000)
-    return base64.b64encode(hashed)
-
-def PBKDF2_HASH_FAST(salt, plain):
-    if isinstance(salt, str):
-            salt = eval(salt)
-    hashed = fastpbkdf2.pbkdf2_hmac('sha512', plain.encode('utf-8'), salt, 1000000)
-    hashed = base64.b64encode(hashed)
-    return hashed
-
-def PBKDF2_HASH_FAST_HEX(salt, plain):
-    if isinstance(salt, str):
-            salt = eval(salt)
-    hashed = fastpbkdf2.pbkdf2_hmac('sha512', plain.encode('utf-8'), salt, 1000000).hex()
-    return hashed
-
-def ARGON2ID_HASH(salt, plain):
-    if isinstance(salt, str):
-            salt = eval(salt)
-    hashed = argon2.low_level.hash_secret_raw(plain.encode('utf-8'), salt, time_cost=50, memory_cost=10000, parallelism=2, hash_len=64, type=argon2.low_level.Type.ID).hex()
-    return hashed
-
-def str2bytes(byte_string):
-    return eval(byte_string)
-
-def generateToken(oid, usr, ttl=120):
-    Token.objects.filter(user=usr, oid=oid).delete()
-    uuid = secrets.token_hex(64)
-    salt = secrets.token_bytes(64)
-    hash = HASH(salt, uuid)
-    token = Token(oid=oid, user=usr, hash=hash, salt=salt, ttl=ttl)
-    token.save()
-    return uuid
-
-def byTob64(bs):
-    return base64.b64encode(bs).decode('utf-8')
-
-def b64Toby(b6):
-    return base64.b64decode(b6.encode('utf-8'))
-
-def str2b64(s):
-    return base64.b64encode(bytes(s, 'utf-8')).decode('utf-8')
-
-def b642str(b6):
-    return base64.b64decode(b6.encode('utf-8')).decode('utf-8')
-
-def b64url_to_b64(str):
-    return str.replace('-', '+').replace('_', '/')
-
-def b64_to_b64url(str):
-    return str.replace('+', '-').replace('/', '_').replace('=', '')
