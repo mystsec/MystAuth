@@ -64,4 +64,4 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-Background images in Myst Auth Links are from [Unsplash](https://unsplash.com) under the [Unsplash License](https://unsplash.com/license) with artist attributions listed in the [relevant section of our docs](https://mystauth.com/docs/#auth-link).
+Background images in Myst Auth Links (and the [`bgimages`](mystauth/static/bgimages) folder) are from [Unsplash](https://unsplash.com) under the [Unsplash License](https://unsplash.com/license) with artist attributions listed in the [relevant section of our docs](https://mystauth.com/docs/#auth-link).
