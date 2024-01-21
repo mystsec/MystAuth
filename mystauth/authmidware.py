@@ -6,6 +6,8 @@ class MystAuthMiddleware:
         self.get_response = get_response  #initiate middleware, not special for Myst Auth
 
     def __call__(self, request, *args, **kwargs):
+        print('Req: ', request.path)
+
         if request.path == '/dash/' and request.method == 'GET' and 'usr' in request.GET and 'token' in request.GET:  #check if request is to relevant url and url params exist
             user = request.GET.get('usr')  #get username param
             token = request.GET.get('token')  #get auth token param
@@ -18,9 +20,6 @@ class MystAuthMiddleware:
             myst_id = env("API_ID") #get api id
             myst_api_key = env("API_KEY") #get api key
 
-            print(myst_id)
-            print(myst_api_key)
-
             myst_params = {  #POST parameters
                 "id": myst_id,  #your API id, best to retrieve from environment variable or secrets file
                 "apiKey": myst_api_key,  #your API key, best to retrieve from environment variable or secrets file
@@ -30,11 +29,6 @@ class MystAuthMiddleware:
 
             auth = requests.post(myst_endpoint, json=myst_params)  #make API call, pass params
             auth = auth.json()  #get json
-
-            #getOrigin = Origin.objects.get(uid = myst_id)
-            #oid = getOrigin.oid
-
-            #auth = authenticateToken(oid, user, token)
 
             authenticated = auth['success']  #gets 'success' field from json
 
