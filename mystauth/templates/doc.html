@@ -43,8 +43,8 @@
     <div class="mobile-menu-closer"></div>
     <div class="content-menu">
         <div class="content-infos">
-            <div class="info"><b>Version:</b> 1.0.0</div>
-            <div class="info"><b>Last Updated:</b> January 5, 2024</div>
+            <div class="info"><b>Version:</b> 1.1.0</div>
+            <div class="info"><b>Last Updated:</b> January 21, 2024</div>
         </div>
         <ul>
             <li class="scroll-to-link active" data-target="content-intro">
@@ -67,6 +67,15 @@
             </li>
             <li class="scroll-to-link" data-target="content-user-management">
                 <a>User Management</a>
+            </li>
+            <li class="scroll-to-link" data-target="content-reset-link">
+                <a>Reset Link</a>
+            </li>
+            <li class="scroll-to-link" data-target="content-security">
+                <a>Security</a>
+            </li>
+            <li class="scroll-to-link" data-target="content-changelog">
+                <a>Changelog</a>
             </li>
             <li class="scroll-to-link" data-target="content-attributions">
                 <a>Attributions</a>
@@ -231,7 +240,7 @@ class MystAuthMiddleware:
             </table>
 
             <br><p>The <code class="higlighted break-word">dash</code> app (the API Account Dashboard) code in <a href="https://github.com/mystsec/MystAuth" target="_blank">our Github</a> serves as an example implementation of Myst Auth.</p>
-         
+
         </div>
         <div class="overflow-hidden content-section" id="content-api-settings">
             <h1>API Settings <a href="#api-settings">#</a></h1>
@@ -257,6 +266,10 @@ class MystAuthMiddleware:
                 <tr>
                     <td>BioOnly</td>
                     <td>If set to <code class="higlighted break-word">True</code>, enforces that users must register their passkey using on-device biometric authentication (Apple TouchID, Windows Hello, etc.) and are not allowed to use external authenticators like security keys. Default is <code class="higlighted break-word">False</code>. BioOnly is editable.</td>
+                </tr>
+                <tr>
+                    <td>AllowResets</td>
+                    <td>If set to <code class="higlighted break-word">True</code>, allows you to offer passkey resets/account recovery to users. Default is <code class="higlighted break-word">False</code> for security purposes. AllowResets is editable. Learn more in the Reset Link section.</td>
                 </tr>
                 </tbody>
             </table>
@@ -289,6 +302,10 @@ class MystAuthMiddleware:
                 <tr>
                     <td>usr</td>
                     <td>(Optional) Username to be pre-filled in the login form. Meant to be used for cases such as Auth Token timeouts where the user is known and must be directed to the Myst Auth login page to re-authenticate. Note: This parameter should only be used in conjunction with the <code class="higlighted break-word">#login</code> parameter appended to the url (learn more below).</td>
+                </tr>
+                <tr>
+                    <td>rst</td>
+                    <td>(Optional) The url where the user should be directed to recover their account if their passkey is lost. Must use HTTPS and match the origin registered with your API account. If this link itself contains url parameters, it must be URL Encoded (in JS using <code class="higlighted break-word">encodeURIComponent()</code>) for those params to be properly passed. Learn more about passkey resets in the Reset Link section.</td>
                 </tr>
                 <tr>
                     <td>img</td>
@@ -579,6 +596,155 @@ class MystAuthMiddleware:
                 </tr>
                 </tbody>
             </table>
+        </div>
+        <div class="overflow-hidden content-section" id="content-reset-link">
+            <h1>Reset Link <a href="#reset-link">#</a></h1>
+
+            <p>Most users' passkeys are automatically backed up through their device's account (iCloud Keychain, Google Account, Outlook Account, etc.), however there is still a chance that the user loses their device and/or access to their passkey for your app. So, Myst Auth provides an optional passkey reset system which can be enabled by changing the <code class="higlighted break-word">allowReset</code> setting in your Myst Auth Account Dashboard to <code class="higlighted break-word">True</code>.</p>
+
+            <h3>NOTE: ALLOWING USERS TO RESET THEIR PASSKEY SIGNIFICANTLY INCREASES THE RISK AND POSSIBILITY OF ACCOUNT COMPROMISING ATTACKS (LIKE PHISHING)! THIS SETTING SHOULD NOT BE ENABLED ON APPLICATIONS WHERE SECURITY IS CRITICAL FOR PROTECTING SENSITIVE DATA!</h3>
+
+            <p>In order to offer passkey resets securely to a user, you must have a VERIFIED communication method (such as an email address which the user has verified) attached to their Myst Auth username (their communication method should be collected and verified during the user onboarding process after they first sign up through the Myst Auth login portal). Once you have a system for verifying a user's communication method, you can offer a page where your users enter their communication details (ex. enter their email address), and if the it matches (is linked in your database to) a Myst Auth username/account, you can send to the user (via that communication method) a Myst Auth Reset Link. Your 'request reset' page can also be included in the Myst Auth Link parameters, allowing a <code class="higlighted break-word">Lost Passkey?</code> prompt to be shown to your users directly on the Myst Auth login portal.</p>
+
+            <p>The <code class="higlighted break-word">allowReset = True</code> setting allows you to call the following Myst Auth endpoint in order to generate a Magic Code which is used to provide the Reset Link:</p>
+
+            <p><code class="higlighted break-word">https://mystauth.com/api/v1/user/reset/</code></p>
+
+            <p>with the following POST parameters:</p>
+
+            <table class="central-overflow-x">
+                <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>id</td>
+                    <td>Your API id.</td>
+                </tr>
+                <tr>
+                    <td>apiKey</td>
+                    <td>Your API key.</td>
+                </tr>
+                <tr>
+                    <td>usr</td>
+                    <td>User's username</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <br><p>The API will return one of the following responses:</p>
+
+            <table class="central-overflow-x">
+                <thead>
+                <tr>
+                    <th>JSON Response</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code class="higlighted break-word">{'success': True, 'mcode': the-magic-code-used-in-the-reset-link}</code></td>
+                    <td>A Magic Code was successfully generated and expires after 10 minutes.</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">{'success': false, 'info': 'API Authentication Failed!'}</code></td>
+                    <td>Authentication failed, your API id and key did not authenticate successfully. The Magic Code was not set.</td>
+                </tr>
+                <tr>
+                    <td><code class="higlighted break-word">{'success': False, 'info': 'allowReset set to False, change in API Account Dashboard'}</code></td>
+                    <td>Your account permissions have not been set to allow the creation of Reset Links (see above).</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <br><p>Once a user requests a Reset Link by entering a valid and verified communication method to your 'request reset' page, you must call the <code class="higlighted break-word">/user/reset/</code> API endpoint above to establish a Magic Code, so you can send the following Reset Link to the user's verified communication method:</p>
+
+            <p><code class="higlighted break-word">https://mystauth.com/reset/</code></p>
+
+            <p>with the following url/GET parameters:</p>
+
+            <table class="central-overflow-x">
+                <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>rid</td>
+                    <td>Your Request ID, listed in your API account dashboard.</td>
+                </tr>
+                <tr>
+                    <td>ref</td>
+                    <td>The redirect url where the user should be directed after their passkey is reset. Must use HTTPS and match the origin registered with your API account. If your redirect url itself contains url parameters, it must be URL Encoded (in JS using <code class="higlighted break-word">encodeURIComponent()</code>) for those params to be properly passed. Otherwise, the url does not need to be encoded, but should be the last parameter.</td>
+                </tr>
+                <tr>
+                    <td>mc</td>
+                    <td>A valid Magic Code you generated on reset request from the user.</td>
+                </tr>
+                <tr>
+                    <td>usr</td>
+                    <td>The Username of the user who is trying to reset their passkey.</td>
+                </tr>
+                <tr>
+                    <td>img</td>
+                    <td>(Optional) ID of image to be set as background image. See the Auth Link section for more details.</td>
+                </tr>
+                <tr>
+                    <td>bgclr</td>
+                    <td>(Optional) Hex color, without '#', for the UI background. If a background image is set, this param won't be used.</td>
+                </tr>
+                <tr>
+                    <td>clr</td>
+                    <td>(Optional) Hex color, without '#', for the Myst Auth UI's button.</td>
+                </tr>
+                <tr>
+                    <td>hovclr</td>
+                    <td>(Optional) Hex color, without '#', for the Myst Auth UI's button hover.</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <br><p>The Reset Link uses mostly the same parameters as the Auth Link, but adds the Magic Code to verify the reset session. A Magic Code is valid for the user to open the Reset Link for 10 minutes after it is generated. Once the Reset Link is opened, the Magic Code becomes invalid (so the same link cannot be used again) and the user has another 10 minutes to begin the new passkey registration process. Once the registration process is started, the user has 3 minutes to complete the process (ex. put their finger on their device's fingerprint scanner, etc.) or cancel their device's registration prompt. If the device passkey process is cancelled, the user will have another 3 minutes to restart it. After the reset process is complete, the user is redirected to the url you set along with an Auth Token, which has a 45 seconds TTL like every other Myst Auth Token sent after authentication.</p>
+
+            <p>These measures were implemented to make the reset process as secure as possible, but it is important to note that anyone with a Reset Link with a valid Magic Code has the ability to reset the account and takeover the account. This means that you are placing trust in the user's communication method and any compromise of it will be a compromise of the authentication system when Reset Links are enabled. We are working on adding email support and end-to-end handling of the reset process natively in Myst Auth.</p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-security">
+            <h1>Security <a href="#security">#</a></h1>
+
+            <h4>Account Settings</h4>
+
+            <p>Your account settings can be changed from your <a href="https://mystauth.com/dash/" target="_blank">Myst Auth Account Dashboard</a>, and these processes are protected by both your API key and your passkey session authentication.</p>
+
+            <p>We <strong>STRONGLY</strong> recommend you cycle your Myst Auth API key from the account dashboard regularly (once per month or during scheduled maintainence windows) to prevent API compromise and ensure your account uses our latest security updates. While a compromised API key is a serious security breach, the attacker will not be able to change critical settings (such as <code class="higlighted break-word">allowReset</code>) or cycle or delete your API key thanks to the passkey verification required to access your acocunt dashboard. If you have not enabled Reset Links, the attacker will only be able to impact user accounts if they are also able to intercept a valid user Auth Token.</p>
+
+            <h4>Hashing</h4>
+
+            <p>Myst Auth currently uses PBKDF2-HMAC-SHA512 with 1,000,000 iterations (as per recommendations by <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html" target="_blank">OWASP</a> and <a href="https://pages.nist.gov/800-63-3/sp800-63b.html#memsecretver" target="_blank">NIST</a>) to hash API keys, Auth Tokens, and Magic Codes for storage in our database (learn more about password hashing from <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html" target="_blank">OWASP</a>). We have added internal support for Argon2id hashing and are working on validating the security of our setup before allowing it as an alternative hash option.</p>
+        </div>
+        <div class="overflow-hidden content-section" id="content-changelog">
+            <h1>Changelog <a href="#changelog">#</a></h1>
+
+            <h4>v1.1.0</h4>
+            <ul>
+                <li>Added reset link support</li>
+                <li>Code refactored for readability/separation of security critical methods</li>
+                <li>Improved error messaging</li>
+                <li>Improved DOS prevention</li>
+                <li>Improved background image loading</li>
+            </ul>
+
+            <h4>v1.0.5</h4>
+            <ul>
+                <li>Improved login portal url parameter sanitization</li>
+                <li>Improved hash function management</li>
+                <li><code class="higlighted break-word">fastpbkdf2</code> made default hash function (instead of <code class="higlighted break-word">hashlib</code> PBKDF2), with <code class="higlighted break-word">argon2</code> support added (going through internal testing process before it will be provided as an alternative hashing option)</li>
+                <li>Improved Django settings for session and cookie security</li>
+            </ul>
         </div>
         <div class="overflow-hidden content-section" id="content-attributions">
             <h1>Attributions <a href="#attributions">#</a></h1>
