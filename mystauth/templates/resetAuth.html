@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Secure Login</title>
+    <link rel="preload" href="../static/resetAuth.css" as="style">
+    <link rel="preload" href="../static/resetAuth.js" as="script">
+    {% if img %}
+    <link rel="preload" href="../static/bgimages/{{ img }}.webp" as="image">
+    {% endif %}
+    <link rel="stylesheet" href="../static/resetAuth.css">
+    <style>
+        :root {
+            {% if clr %}
+            --btn: #{{ clr }};
+            {% endif %}
+            {% if hovclr %}
+            --btn_hover: #{{ hovclr }};
+            {% endif %}
+        }
+
+        body {
+            {% if img %}
+            background-image: image-set(
+            url('../static/bgimages/{{ img }}.webp') type("image/webp"),
+            url('../static/bgimages/{{ img }}.AVIF') type("image/avif"),
+            url('../static/bgimages/{{ img }}.jpg') type("image/jpeg"));
+            background-image: -webkit-image-set(
+            url('../static/bgimages/{{ img }}.webp'),
+            url('../static/bgimages/{{ img }}.AVIF'),
+            url('../static/bgimages/{{ img }}.jpg'));
+            {% elif bgclr %}
+            background-color: #{{ bgclr }};
+            {% endif %}
+        }
+    </style>
+  </head>
+  <body>
+    <div id="selector" class="selector">
+        <div id="recovery" name="selection" aria-selected="true">
+            <h1>Account Recovery</h1>
+        </div>
+    </div>
+    <div id="auth" class="content">
+        <div id="auth_form_container">
+            <form id="auth_form">
+                {% csrf_token %}
+                <p>Username:</p>
+                <input id="usr" type="text" placeholder="Enter Username" value="{{ usr }}" readonly>
+                <button id="submit" style="background">Reset Passkey</button>
+            </form>
+            <p id="notif"></p>
+        </div>
+        <div id="loading_container" hidden="none">
+            <p id="loading_msg">Resetting Account . . .</p>
+        </div>
+        <div class="label">
+            <p><a class="madeby" href="https://mystauth.com" target="_blank">Secured by Myst</a></p>
+            <p><a class="madeby" href="https://mystauth.com/terms" target="_blank"><small>Terms</small></a> ⋅ <a class="madeby" href="https://mystauth.com/privacy" target="_blank"><small>Privacy</small></a></p>
+        </div>
+    </div>
+    {% if img %}
+    <div id="imgsrc">
+        <a href="https://unsplash.com/photos/{{ img }}" id="imgurl" target="_blank">Image from Unsplash</a>
+    </div>
+    {% endif %}
+    <div hidden="none">
+        <div id="bioOnly">{{ bioOnly }}</div>
+        <div id="getUser">{{ usr }}</div>
+        <div id="ref">{{ ref }}</div>
+        <div id="token">{{ token }}</div>
+    </div>
+        <script src="../static/resetAuth.js"></script>
+  </body>
+</html>
