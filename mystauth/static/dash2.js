@@ -24,6 +24,7 @@ editForm.addEventListener('submit', async function(e) {
   let oid = document.getElementById("oid").value;
   let ttl = document.getElementById("ttl").value;
   let bioOnly = document.getElementById("bioOnly").value;
+  let allowReset = document.getElementById("allowReset").value;
 
   if (!onlySpaces(oid) && !onlySpaces(ttl) && !onlySpaces(bioOnly) && !onlySpaces(apiKey))
   {
@@ -34,7 +35,7 @@ editForm.addEventListener('submit', async function(e) {
         mode: "same-origin",
         credentials: "same-origin",
         headers: {'X-CSRFToken': csrftoken},
-        body: JSON.stringify({'oid': oid, 'usr': usr, 'token': token, 'id': id, 'apiKey': apiKey, 'ttl': ttl, 'bioOnly': bioOnly})
+        body: JSON.stringify({'oid': oid, 'usr': usr, 'token': token, 'id': id, 'apiKey': apiKey, 'ttl': ttl, 'bioOnly': bioOnly, 'allowReset': allowReset})
     }).then(response => response.json())
       .then(async (data) => {
         if (data['success'])
@@ -43,6 +44,7 @@ editForm.addEventListener('submit', async function(e) {
           document.getElementById("oid").value = data['oid'];
           document.getElementById("ttl").value = data['ttl'];
           document.getElementById("bioOnly").value = data['bioOnly'];
+          document.getElementById("allowReset").value = data['allowReset'];
           document.getElementById("key").value = "";
           setToken(data["token"]);
         }
