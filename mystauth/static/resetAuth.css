@@ -69,6 +69,7 @@ body {
   border-radius: 0 0 15px 15px;
   border-color: var(--border_clr);
   background-color: var(--background);
+  box-shadow: 0px 20px 20px 0px rgba(0, 0, 0, 0.2);
 }
 
 .content form {
