@@ -9,7 +9,8 @@ var token = document.getElementById("token").innerHTML;
 window.onload = async function() {
   if (! await checkSupport())
   {
-    document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys-work/' target='_blank'>Passkeys<>
+    document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys-work/' target='_blank'>Passkeys</a> 😢 <br><br><a href='https://passkeys.dev/device-support/#matrix' target='_blank'>Check Support</a>";
+    loading();
     loading();
   }
   console.log("%cStop!", "color: red; font-size: 3rem;");
