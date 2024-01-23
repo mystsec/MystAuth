@@ -132,7 +132,7 @@ def generateToken(oid, usr, ttl=120, rst=False):
 
 
 #Generates New Origin
-def newOrigin(oid, ttl=3600, bio_only=False, hash=1):
+def newOrigin(oid, ttl=3600, bio_only=False, hashFct=1):
     if Origin.objects.filter(oid=oid).exists():
         return {'success': False, 'info': 'Origin already taken! If you own this origin, please contact us.'}
     hashMat = getHashMat()
@@ -143,7 +143,7 @@ def newOrigin(oid, ttl=3600, bio_only=False, hash=1):
     rid = getUUIDHex()
     while Origin.objects.filter(rid=rid).exists():
         rid = getUUIDHex()
-    auth = Origin(uid = uid, uuid = hash, salt = hashMat["salt"], rid = rid, oid = oid, ttl = ttl, bioOnly = bio_only, hashFct = hash)
+    auth = Origin(uid = uid, uuid = hash, salt = hashMat["salt"], rid = rid, oid = oid, ttl = ttl, bioOnly = bio_only, hashFct = hashFct)
     auth.save()
     result = {'success': True, 'id': uid, 'apiKey': hashMat["uuid"], 'reqId': rid}
     return result
