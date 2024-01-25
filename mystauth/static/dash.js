@@ -34,10 +34,10 @@ form.addEventListener('submit', async function(e) {
           {
             document.getElementById("api_id").innerHTML = data["id"];
             document.getElementById("api_key").innerHTML = data["apiKey"];
-            document.getElementById("api_link").innerHTML = 'https://mystauth.com/auth/?rid='+data["reqId"]+'&ref=';
             setToken(data["token"]);
             document.getElementById("input").setAttribute("hidden", "none");
             document.getElementById("data").removeAttribute("hidden");
+            setTimeout(function() { document.getElementById("data_button").disabled = false;}, 10000);
           }
           else
           {
