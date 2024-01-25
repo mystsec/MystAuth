@@ -28,16 +28,13 @@
         </div>
 
         <div hidden="none" id="data">
-            <p>Account Created!</p>
+            <p>Account Created!</p><br>
             <p>API Id: <code id="api_id"></code></p>
             <p>API Key: <code id="api_key"></code></p>
-            <p><strong>IMPORTANT:</strong> You will not be able to access your API Key through this dashboard again. Store it securely!</p>
-            <p>Base Auth Link: <code id="api_link"></code></p>
-            <p>This Auth Link must be used with a "ref" parameter following the requirements listed in the <a href="/docs" target="_blank">API docs</a>.</p>
-            <br><p>You are now ready to add Myst Auth to your app! Our <a href="/docs" target="_blank">API docs</a> will guide your through the simple steps. Once you go to your Dashboard (be sure to securely store your API Key first), you will be able to access and change your API Settings.</p>
-            <p>Happy Coding 💻!</p>
+            <p><strong>STOP! &nbsp IMPORTANT:</strong> You will not be able to access your API Key through this dashboard again. Copy and store it securely! Do not continue until you have done so!</p>
+            <br><p>Happy Coding 💻!</p>
 
-            <button onclick="window.location.reload();">Continue to Account Dashboard</button>
+            <button id="data_button" onclick="window.location.reload();" disabled>Continue to Account Dashboard</button>
         </div>
 
     </div>
