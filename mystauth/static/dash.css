@@ -120,6 +120,35 @@ body {
   color: var(--link);
 }
 
+#data p strong {
+  color: var(--link);
+}
+
+#data button {
+  margin: 0 auto;
+  margin-block: 1.5rem;
+  padding-block: 0.3rem;
+  font-size: 1.2rem;
+  width: 250px;
+  display: block;
+  background-color: var(--btn);
+  border: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: var(--border_clr);
+  color: var(--btn_text);
+  cursor: pointer;
+}
+
+#data button:hover {
+  background-color: var(--btn_hover);
+}
+
+#data button:disabled {
+  background-color: var(--btn_hover);
+  cursor: wait;
+}
+
 .notif[success="false"] {
   color: var(--link);
 }
