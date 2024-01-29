@@ -14,6 +14,8 @@ class MystAuthMiddleware:
                 user = request.COOKIES.get('myst_usr')     #get username cookie
                 token = request.COOKIES.get('myst_token')  #get auth token cookie
 
+            request.user = user  #sets request param 'user' to username
+
             myst_endpoint = "https://mystauth.com/api/v1/user/token/verify/" #Myst Auth Token verify endpoint
 
             env = environ.Env()            #get environment vars
