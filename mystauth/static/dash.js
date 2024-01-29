@@ -8,15 +8,26 @@ document.getElementById('hnm').onclick = function() {
 };
 
 window.onload = function() {
-  urlParams.set("token", document.getElementById("token").innerHTML);
+  urlParams.delete('usr');
+  urlParams.delete('token');
   let url = window.location.pathname + '?' + urlParams.toString() + window.location.hash;
   window.history.replaceState({}, "",  url);
 };
 
+document.getElementById("signout").onclick = async function() {
+  await fetch('/dash/signout/', {
+    method: "POST",
+    mode: "same-origin",
+    credentials: "same-origin",
+    headers: {'X-CSRFToken': csrftoken}
+  }).then(response => {
+    window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&ref=https://mystauth.com/dash#login";
+  });
+}
+
 form.addEventListener('submit', async function(e) {
   e.preventDefault();
   let usr = document.getElementById("usr").innerHTML;
-  let token = document.getElementById("token").innerHTML;
   let nOid = document.getElementById("oid").value;
 
   if (!onlySpaces(nOid))
@@ -27,14 +38,13 @@ form.addEventListener('submit', async function(e) {
         mode: "same-origin",
         credentials: "same-origin",
         headers: {'X-CSRFToken': csrftoken},
-        body: JSON.stringify({'nOid': nOid, 'oid': 'mystauth.com', 'usr': usr, 'token': token})
+        body: JSON.stringify({'nOid': nOid, 'oid': 'mystauth.com'})
     }).then(response => response.json())
       .then(async (data) => {
           if (data['success'])
           {
             document.getElementById("api_id").innerHTML = data["id"];
             document.getElementById("api_key").innerHTML = data["apiKey"];
-            setToken(data["token"]);
             document.getElementById("input").setAttribute("hidden", "none");
             document.getElementById("data").removeAttribute("hidden");
             setTimeout(function() { document.getElementById("data_button").disabled = false;}, 10000);
@@ -42,12 +52,9 @@ form.addEventListener('submit', async function(e) {
           else
           {
             notify(data['info'], 0);
-            try {
-              setToken(data["token"]);
-            }
-            catch
+            if (data['info'].includes("Time"))
             {
-              console.log("Auth Failed");
+              window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr="+usr+"&ref=https://mystauth.com/dash#login";
             }
           }
       });
@@ -58,14 +65,6 @@ form.addEventListener('submit', async function(e) {
 function onlySpaces(str)
 {
   return str.replace(/\s/g, '').length == 0;
-}
-
-function setToken(token)
-{
-  document.getElementById("token").innerHTML = token;
-  urlParams.set("token", token);
-  let url = window.location.pathname + '?' + urlParams.toString() + window.location.hash;
-  window.history.replaceState({}, "",  url);
 }
 
 function notify(str, type) {
