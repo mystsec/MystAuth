@@ -1,12 +1,19 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from .models import Acc
 from mystauth.models import Origin
 
 # Create your views here.
+def signout(request):
+    response = JsonResponse({'success': True}, safe=False)
+    response.delete_cookie('myst_usr')
+    response.delete_cookie('myst_token')
+    return response
+
 def dash(request):
     if request.authenticated:
-        usr = request.GET.get('usr')
-        data = {'usr': usr, 'auth_token': request.token}
+        usr = request.user
+        data = {'usr': usr}
         if Acc.objects.filter(user=usr).exists():
             getUser = Acc.objects.get(user=usr)
             oid = getUser.oid
@@ -19,9 +26,15 @@ def dash(request):
             data['allowReset'] = str(getOrigin.allowReset)
             data['userCount'] = getOrigin.userCount
             data['apiTokens'] = getOrigin.apiTokens
-            return render(request, "dash2.html", data)
+            response = render(request, "dash2.html", data)
+            response.set_cookie('myst_usr', usr, samesite='Lax', secure=True, httponly=True)
+            response.set_cookie('myst_token', request.token, samesite='Lax', secure=True, httponly=True)
+            return response
         else:
-            return render(request, "dash.html", data)
+            response = render(request, "dash.html", data)
+            response.set_cookie('myst_usr', usr, samesite='Lax', secure=True, httponly=True)
+            response.set_cookie('myst_token', request.token, samesite='Lax', secure=True, httponly=True)
+            return response
     elif request.info == "Login Timed Out!":
         usr = request.GET.get('usr')
         return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr='+usr+'&ref=https://mystauth.com/dash#login')
