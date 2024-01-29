@@ -8,6 +8,7 @@
   --success: #64c832;
   --icon: #adb5bd;
   --btn: #3498db;
+  --btn_text: #000;
   --btn_hover: #2980b9;
   --border_clr: #8695ad;
 }
@@ -32,6 +33,26 @@ body {
 
 #header h1 {
   margin: 0;
+  display: inline-block;
+}
+
+#header button {
+  display: inline-block;
+  float: right;
+  padding-block: 0.3rem;
+  font-size: 1.2rem;
+  width: 130px;
+  display: block;
+  background-color: var(--btn);
+  border: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  color: var(--btn_text);
+  cursor: pointer;
+}
+
+#header button:hover {
+  background-color: var(--btn_hover);
 }
 
 #hnm {
@@ -147,6 +168,14 @@ body {
 #data button:disabled {
   background-color: var(--btn_hover);
   cursor: wait;
+}
+
+#api_key {
+  filter: blur(5px);
+}
+
+#api_key:hover {
+  filter: blur(0px);
 }
 
 .notif[success="false"] {
