@@ -2,6 +2,7 @@ var editForm = document.getElementById("edit-form");
 var cycForm = document.getElementById("key-form");
 var delForm = document.getElementById("del-form");
 var csrftoken = document.querySelector("input[name='csrfmiddlewaretoken']").value;
+const usr = document.getElementById("usr").innerHTML;
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 
@@ -10,15 +11,25 @@ document.getElementById('hnm').onclick = function() {
 };
 
 window.onload = function() {
-  urlParams.set("token", document.getElementById("token").innerHTML);
+  urlParams.delete('usr');
+  urlParams.delete('token');
   let url = window.location.pathname + '?' + urlParams.toString() + window.location.hash;
   window.history.replaceState({}, "",  url);
 };
 
+document.getElementById("signout").onclick = async function() {
+  await fetch('/dash/signout/', {
+    method: "POST",
+    mode: "same-origin",
+    credentials: "same-origin",
+    headers: {'X-CSRFToken': csrftoken}
+  }).then(response => {
+    window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&ref=https://mystauth.com/dash#login";
+  });
+}
+
 editForm.addEventListener('submit', async function(e) {
   e.preventDefault();
-  let usr = document.getElementById("usr").innerHTML;
-  let token = document.getElementById("token").innerHTML;
   let id = document.getElementById("id").innerHTML;
   let apiKey = document.getElementById("key").value;
   let oid = document.getElementById("oid").value;
@@ -35,7 +46,7 @@ editForm.addEventListener('submit', async function(e) {
         mode: "same-origin",
         credentials: "same-origin",
         headers: {'X-CSRFToken': csrftoken},
-        body: JSON.stringify({'oid': oid, 'usr': usr, 'token': token, 'id': id, 'apiKey': apiKey, 'ttl': ttl, 'bioOnly': bioOnly, 'allowReset': allowReset})
+        body: JSON.stringify({'oid': oid, 'id': id, 'apiKey': apiKey, 'ttl': ttl, 'bioOnly': bioOnly, 'allowReset': allowReset})
     }).then(response => response.json())
       .then(async (data) => {
         if (data['success'])
@@ -46,18 +57,10 @@ editForm.addEventListener('submit', async function(e) {
           document.getElementById("bioOnly").value = data['bioOnly'];
           document.getElementById("allowReset").value = data['allowReset'];
           document.getElementById("key").value = "";
-          setToken(data["token"]);
         }
         else
         {
           notify(data['info'], 0, 'edit');
-          if (data["token"] != undefined) {
-            setToken(data["token"]);
-          }
-          else
-          {
-            console.log("Auth Failed");
-          }
           if (data['info'].includes("Time"))
           {
             window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr="+usr+"&ref=https://mystauth.com/dash#login";
@@ -69,8 +72,6 @@ editForm.addEventListener('submit', async function(e) {
 
 cycForm.addEventListener('submit', async function(e) {
   e.preventDefault();
-  let usr = document.getElementById("usr").innerHTML;
-  let token = document.getElementById("token").innerHTML;
   let id = document.getElementById("id").innerHTML;
   let apiKey = document.getElementById("old-key").value;
 
@@ -82,7 +83,7 @@ cycForm.addEventListener('submit', async function(e) {
         mode: "same-origin",
         credentials: "same-origin",
         headers: {'X-CSRFToken': csrftoken},
-        body: JSON.stringify({'usr': usr, 'token': token, 'id': id, 'apiKey': apiKey})
+        body: JSON.stringify({'id': id, 'apiKey': apiKey})
     }).then(response => response.json())
       .then(async (data) => {
         if (data['success'])
@@ -91,18 +92,10 @@ cycForm.addEventListener('submit', async function(e) {
           document.getElementById("old-key").value = "";
           document.getElementById("new-key").innerHTML = data['apiKey'];
           document.getElementById("new-creds").removeAttribute("hidden");
-          setToken(data["token"]);
         }
         else
         {
           notify(data['info'], 0, 'cyc');
-          if (data["token"] != undefined) {
-            setToken(data["token"]);
-          }
-          else
-          {
-            console.log("Auth Failed");
-          }
           if (data['info'].includes("Time"))
           {
             window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr="+usr+"&ref=https://mystauth.com/dash#login";
@@ -115,8 +108,6 @@ cycForm.addEventListener('submit', async function(e) {
 
 delForm.addEventListener('submit', async function(e) {
   e.preventDefault();
-  let usr = document.getElementById("usr").innerHTML;
-  let token = document.getElementById("token").innerHTML;
   let id = document.getElementById("id").innerHTML;
   let apiKey = document.getElementById("del-key").value;
 
@@ -128,26 +119,18 @@ delForm.addEventListener('submit', async function(e) {
         mode: "same-origin",
         credentials: "same-origin",
         headers: {'X-CSRFToken': csrftoken},
-        body: JSON.stringify({'usr': usr, 'token': token, 'id': id, 'apiKey': apiKey})
+        body: JSON.stringify({'id': id, 'apiKey': apiKey})
     }).then(response => response.json())
       .then(async (data) => {
         if (data['success'])
         {
           notify('Success!', 1, 'del');
           document.getElementById("del-key").value = "";
-          setToken(data["token"]);
           window.location.reload();
         }
         else
         {
           notify(data['info'], 0, 'del');
-          if (data["token"] != undefined) {
-            setToken(data["token"]);
-          }
-          else
-          {
-            console.log("Auth Failed");
-          }
           if (data['info'].includes("Time"))
           {
             window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr="+usr+"&ref=https://mystauth.com/dash#login";
@@ -161,14 +144,6 @@ delForm.addEventListener('submit', async function(e) {
 function onlySpaces(str)
 {
   return str.replace(/\s/g, '').length == 0;
-}
-
-function setToken(token)
-{
-  document.getElementById("token").innerHTML = token;
-  urlParams.set("token", token);
-  let url = window.location.pathname + '?' + urlParams.toString() + window.location.hash;
-  window.history.replaceState({}, "",  url);
 }
 
 function notify(str, type, form) {
