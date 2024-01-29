@@ -388,8 +388,8 @@ def editOrigin(request):
     auth = authenticate(id, apiKey)
     if auth[0]:
         oid = auth[1]
-        usr = body['usr']
-        token = body['token']
+        usr = request.COOKIES.get('myst_usr')
+        token = request.COOKIES.get('myst_token')
 
         auth2 = authenticateToken("mystauth.com", usr, token, auth[2])
         if auth2['success']:
@@ -398,7 +398,7 @@ def editOrigin(request):
             bioOnly = body['bioOnly'] == "True"
             allowReset = body['allowReset'] == "True"
             if oid != newOid and Origin.objects.filter(oid=newOid).exists():
-                result = {'success': False, 'info': 'Origin already taken!', 'token': auth2['token']}
+                result = {'success': False, 'info': 'Origin already taken!'}
             else:
                 auth = Origin.objects.get(oid=oid)
                 auth.oid = newOid
@@ -409,8 +409,10 @@ def editOrigin(request):
                 getAcc = Acc.objects.get(user=usr, oid=oid)
                 getAcc.oid = newOid
                 getAcc.save()
-                result = {'success': True, 'oid': newOid, 'ttl': ttl, 'bioOnly': str(bioOnly), 'allowReset': str(allowReset), 'token': auth2['token']}
-            return JsonResponse(result, safe=False)
+                result = {'success': True, 'oid': newOid, 'ttl': ttl, 'bioOnly': str(bioOnly), 'allowReset': str(allowReset)}
+            response = JsonResponse(result, safe=False)
+            response.set_cookie('myst_token', auth2['token'], samesite='Lax', secure=True, httponly=True)
+            return response
         else:
             return JsonResponse(auth2, safe=False)
     else:
@@ -423,8 +425,8 @@ def cycleAPI(request):
     auth = authenticate(id, apiKey)
     if auth[0]:
         oid = auth[1]
-        usr = body['usr']
-        token = body['token']
+        usr = request.COOKIES.get('myst_usr')
+        token = request.COOKIES.get('myst_token')
 
         auth2 = authenticateToken("mystauth.com", usr, token, auth[2])
         if auth2['success']:
@@ -436,8 +438,9 @@ def cycleAPI(request):
             origin.salt = hashMat["salt"]
             origin.save()
 
-            result = {'success': True, 'apiKey': hashMat["uuid"], 'token': auth2['token']}
-            return JsonResponse(result, safe=False)
+            response = JsonResponse({'success': True, 'apiKey': hashMat["uuid"]}, safe=False)
+            response.set_cookie('myst_token', auth2['token'], samesite='Lax', secure=True, httponly=True)
+            return response
         else:
             return JsonResponse(auth2, safe=False)
     else:
@@ -450,16 +453,17 @@ def delAPI(request):
     auth = authenticate(id, apiKey)
     if auth[0]:
         oid = auth[1]
-        usr = body['usr']
-        token = body['token']
+        usr = request.COOKIES.get('myst_usr')
+        token = request.COOKIES.get('myst_token')
 
         auth2 = authenticateToken("mystauth.com", usr, token, auth[2])
         if auth2['success']:
             Origin.objects.get(oid=oid).delete()
             Acc.objects.get(user=usr, oid=oid).delete()
 
-            result = {'success': True, 'token': auth2['token']}
-            return JsonResponse(result, safe=False)
+            response = JsonResponse({'success': True}, safe=False)
+            response.set_cookie('myst_token', auth2['token'], samesite='Lax', secure=True, httponly=True)
+            return response
         else:
             return JsonResponse(auth2, safe=False)
     else:
@@ -532,8 +536,8 @@ def newOriginAPI(request):
     body = json.loads(request.body.decode('utf-8'))
     oid = body['oid']
     nOid = body['nOid']
-    usr = body['usr']
-    token = body['token']
+    usr = request.COOKIES.get('myst_usr')
+    token = request.COOKIES.get('myst_token')
     auth = authenticateToken("mystauth.com", usr, token, 3600)
     if auth['success']:
         if 'ttl' in body and 'bioOnly' in body:
@@ -549,12 +553,14 @@ def newOriginAPI(request):
         else:
             result = newOrigin(nOid)
 
-        result['token'] = auth['token']
-
         if result['success']:
             newAcc = Acc(user=usr, oid=nOid)
             newAcc.save()
+
+        response = JsonResponse(result, safe=False)
+        response.set_cookie('myst_token', auth['token'], samesite='Lax', secure=True, httponly=True)
     else:
         result = {'success': False, 'info': auth['info']}
-    return JsonResponse(result, safe=False)
+        response = JsonResponse(result, safe=False)
+    return response
 
