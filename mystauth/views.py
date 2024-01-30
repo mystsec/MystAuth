@@ -33,9 +33,10 @@ from .crypto import (
     authenticateToken,
     generateToken,
     newOrigin,
+    checkURL,
+    getRedirectURL,
 )
 import os
-from urllib.parse import urlparse, unquote
 import json
 import re
 
@@ -60,11 +61,9 @@ def originAuth(request):
         except:
             return render(request, 'block.html')
 
-        url = urlparse(unquote(ref))
-        origin = url.hostname
-        scheme = url.scheme
+        checkRef = checkURL(ref, oid)
 
-        if scheme == 'https' and origin == oid:
+        if checkRef:
             if getOrigin.apiTokens != 0:
                 data = {'bioOnly': str(getOrigin.bioOnly)}
                 if 'img' in request.GET:
@@ -79,8 +78,8 @@ def originAuth(request):
                     data['usr'] = re.sub(r'[^a-zA-Z0-9_-]', '', request.GET.get('usr'))
                 if 'rst' in request.GET:
                     rst = request.GET.get('rst')
-                    rurl = urlparse(unquote(rst))
-                    if rurl.hostname == oid:
+                    checkRst = checkURL(rst, oid)
+                    if checkRst:
                         data['reset'] = re.sub(r'[^a-zA-Z0-9_%/:#&=?.-]', '', rst)
                 data['ref'] = re.sub(r'[^a-zA-Z0-9_%/:#&=?.-]', '', ref)
                 return render(request, 'originAuth.html', data)
@@ -104,11 +103,9 @@ def resetAuth(request):
         except:
             return render(request, 'block.html')
 
-        url = urlparse(unquote(ref))
-        origin = url.hostname
-        scheme = url.scheme
+        checkRef = checkURL(ref, oid)
 
-        if scheme == 'https' and origin == oid:
+        if checkRef:
             auth = authenticateToken(oid, usr, mc, 600, True, True)
             if auth['success']:
                 data = {'bioOnly': str(getOrigin.bioOnly)}
