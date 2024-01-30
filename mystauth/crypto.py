@@ -7,6 +7,7 @@ import base64
 import uuid
 import datetime
 import pytz
+from urllib.parse import urlparse, unquote, urlencode, parse_qs, urlunparse
 
 #Hashing Functions
 def HASH(salt, plain, fct=1):
@@ -66,6 +67,7 @@ def getUID():
 
 def getUUIDHex():
     return uuid.uuid4().hex
+
 
 #Generate Hash Materials
 def getHashMat():
@@ -147,6 +149,34 @@ def newOrigin(oid, ttl=3600, bio_only=False, hashFct=1):
     auth.save()
     result = {'success': True, 'id': uid, 'apiKey': hashMat["uuid"], 'reqId': rid}
     return result
+
+
+#URL Functions
+def checkURL(url, host):
+    url = urlparse(unquote(url))
+    origin = url.hostname
+    scheme = url.scheme
+    return origin == host and scheme == 'https'
+
+def getRedirectURL(url, usr, token):
+    url = prepURL(url)
+    url = addURLParams(url, {'usr': usr, 'token': token})
+    return url
+
+def addURLParams(url, nparams):
+    url = urlparse(url)
+    params = parse_qs(url.query)
+    params.update(nparams)
+    params = urlencode(params, doseq=True)
+    url = urlunparse(
+        (url.scheme, url.netloc, url.path,
+         url.params, params, url.fragment)
+    )
+    return url
+
+def prepURL(url):
+    url = unquote(url)
+    return url.replace('"', "%22").replace("'", "%27").replace('<', "%3C").replace('>', "%3E")
 
 
 #Helper Functions
