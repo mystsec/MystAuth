@@ -29,14 +29,15 @@ def dash(request):
             response = render(request, "dash2.html", data)
             response.set_cookie('myst_usr', usr, samesite='Lax', secure=True, httponly=True)
             response.set_cookie('myst_token', request.token, samesite='Lax', secure=True, httponly=True)
-            return response
         else:
             response = render(request, "dash.html", data)
             response.set_cookie('myst_usr', usr, samesite='Lax', secure=True, httponly=True)
             response.set_cookie('myst_token', request.token, samesite='Lax', secure=True, httponly=True)
-            return response
+        request.user = ""
+        request.token = ""
+        request.authenticated = ""
+        return response
     elif request.info == "Login Timed Out!":
-        usr = request.GET.get('usr')
         return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr='+usr+'&ref=https://mystauth.com/dash#login')
     else:
         return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&ref=https://mystauth.com/dash#login')
