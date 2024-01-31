@@ -40,9 +40,8 @@ form.addEventListener('submit', async function(e) {
         }
         else
         {
-            console.log(data);
+            //console.log(data);
             token = data[1];
-            console.log(data[1]);
             data = JSON.parse(data[0]);
             data.user.id = str2ab(decodeBase64(data.user.id));
             data.challenge = str2ab(decodeBase64(data.challenge));
@@ -77,7 +76,7 @@ form.addEventListener('submit', async function(e) {
                   mode: "same-origin",
                   credentials: "same-origin",
                   headers: {'X-CSRFToken': csrftoken},
-                  body: JSON.stringify({'resp': cred, 'uid': ab2str(data.user.id), 'rid': rid, 'mc': token})
+                  body: JSON.stringify({'resp': cred, 'uid': ab2str(data.user.id), 'rid': rid, 'mc': token, 'ref': refLink})
               }).then(response => response.json())
                 .then(async (data2) => {
                     //console.log(data2);
@@ -86,24 +85,7 @@ form.addEventListener('submit', async function(e) {
                       document.getElementById("loading_msg").innerHTML = "Success, Redirecting . . .";
                       loading();
 
-                      if (urlParams.has('ref'))
-                      {
-                        let ref = prepURL(refLink);
-                        if (ref.includes("?"))
-                        {
-                          ref = ref + "&usr="+usr+"&token="+data2[1];
-                        }
-                        else
-                        {
-                          ref = ref + "?usr="+usr+"&token="+data2[1];
-                        }
-                        window.location.href = ref;
-                      }
-                      else
-                      {
-                        data2 = '';
-                        document.getElementById("loading_msg").innerHTML = "Failed!<br>Request New Reset Link";
-                      }
+                      window.location.href = data2[1];
                     }
                     else
                     {
