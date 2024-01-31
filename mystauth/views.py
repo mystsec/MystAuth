@@ -241,6 +241,13 @@ def userRegister(request):
     response = RegistrationCredential.parse_raw(json.dumps(body['resp']))
     uid = body['uid']
     rid = body['rid']
+    ref = body['ref']
+
+    getOrigin = Origin.objects.get(rid=rid)
+    oid = getattr(getOrigin, 'oid')
+
+    if not checkURL(ref, oid):
+        return JsonResponse(['failed', 'Unsecure Login! Please Reload and Try Again!'], safe=False)
 
     getUser = Auth.objects.get(uid=uid)
     eChallenge = getattr(getUser, 'challenge')
@@ -263,13 +270,12 @@ def userRegister(request):
     getUser.pbk = byTob64(pbk)
     getUser.save()
 
-    getOrigin = Origin.objects.get(rid=rid)
-    oid = getattr(getOrigin, 'oid')
     getOrigin.userCount = getOrigin.userCount + 1
     getOrigin.apiTokens = getOrigin.apiTokens - 1
     getOrigin.save()
     token = generateToken(oid, usr, 45)
-    return JsonResponse(['success', token], safe=False)
+    redirectURL = getRedirectURL(ref, usr, token)
+    return JsonResponse(['success', redirectURL], safe=False)
 
 def resetRegister(request):
     body = json.loads(request.body.decode('utf-8'))
@@ -277,9 +283,13 @@ def resetRegister(request):
     uid = body['uid']
     rid = body['rid']
     mc = body['mc']
+    ref = body['ref']
 
     getOrigin = Origin.objects.get(rid=rid)
     oid = getattr(getOrigin, 'oid')
+
+    if not checkURL(ref, oid):
+        return JsonResponse(['failed', 'Unsecure Login! Please Reload and Try Again!'], safe=False)
 
     getUser = Auth.objects.get(uid=uid)
     usr = getUser.user
@@ -306,7 +316,8 @@ def resetRegister(request):
         getUser.pbk = byTob64(pbk)
         getUser.signCount = 0
         getUser.save()
-        return JsonResponse(['success', auth['token']], safe=False)
+        redirectURL = getRedirectURL(ref, usr, auth['token'])
+        return JsonResponse(['success', redirectURL], safe=False)
     elif 'Time' in auth['info']:
         return JsonResponse(['failed', 'Session Timed Out! Request New Reset Link'], safe=False)
     else:
@@ -347,9 +358,13 @@ def userAuthenticate(request):
     response = AuthenticationCredential.parse_raw(json.dumps(body['resp']))
     username = body['usr']
     rid = body['rid']
+    ref = body['ref']
 
     getOrigin = Origin.objects.get(rid=rid)
     oid = getattr(getOrigin, 'oid')
+
+    if not checkURL(ref, oid):
+        return JsonResponse(['failed', 'Unsecure Login! Please Reload and Try Again!'], safe=False)
 
     getUser = Auth.objects.get(user=username, oid=oid)
     eChallenge = getattr(getUser, 'challenge')
@@ -376,7 +391,8 @@ def userAuthenticate(request):
     getUser.save()
 
     token = generateToken(oid, usr, 45)
-    return JsonResponse(['success', token], safe=False)
+    redirectURL = getRedirectURL(ref, usr, token)
+    return JsonResponse(['success', redirectURL], safe=False)
 
 def editOrigin(request):
     body = json.loads(request.body.decode('utf-8'))
