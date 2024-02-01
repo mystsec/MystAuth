@@ -79,13 +79,20 @@ form.addEventListener('submit', async function(e) {
                 //console.log(cred);
                 //console.log(JSON.stringify(credential));
 
+                let bodyParams = {'resp': cred, 'uid': ab2str(data.user.id), 'rid': rid, 'ref': refLink};
+
+                if (urlParams.has("state"))
+                {
+                  bodyParams.state = urlParams.get("state");
+                }
+
                 //Register Credential on Server
                 await fetch('/api/v1/user/register/verify/', {
                     method: "POST",
                     mode: "same-origin",
                     credentials: "same-origin",
                     headers: {'X-CSRFToken': csrftoken},
-                    body: JSON.stringify({'resp': cred, 'uid': ab2str(data.user.id), 'rid': rid, 'ref': refLink})
+                    body: JSON.stringify(bodyParams)
                 }).then(response => response.json())
                   .then(async (data2) => {
                       //console.log(data2);
@@ -168,13 +175,20 @@ form.addEventListener('submit', async function(e) {
               //console.log(cred);
               //console.log(JSON.stringify(credential));
 
+              let bodyParams = {'resp': cred, 'usr': usr, 'rid': rid, 'ref': refLink};
+
+              if (urlParams.has("state"))
+              {
+                bodyParams.state = urlParams.get("state");
+              }
+
               //Authenticate with Server
               await fetch('/api/v1/user/authenticate/verify/', {
                   method: "POST",
                   mode: "same-origin",
                   credentials: "same-origin",
                   headers: {'X-CSRFToken': csrftoken},
-                  body: JSON.stringify({'resp': cred, 'usr': usr, 'rid': rid, 'ref': refLink})
+                  body: JSON.stringify(bodyParams)
               }).then(response => response.json())
                 .then(async (data2) => {
                     //console.log(data2);
