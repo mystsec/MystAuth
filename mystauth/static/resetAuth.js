@@ -70,13 +70,20 @@ form.addEventListener('submit', async function(e) {
               };
               cred.type = credential.type;
 
+              let bodyParams = {'resp': cred, 'uid': ab2str(data.user.id), 'rid': rid, 'mc': token, 'ref': refLink};
+
+              if (urlParams.has("state"))
+              {
+                bodyParams.state = urlParams.get("state");
+              }
+
               //Register Credential on Server
               await fetch('/api/v1/user/reset/verify/', {
                   method: "POST",
                   mode: "same-origin",
                   credentials: "same-origin",
                   headers: {'X-CSRFToken': csrftoken},
-                  body: JSON.stringify({'resp': cred, 'uid': ab2str(data.user.id), 'rid': rid, 'mc': token, 'ref': refLink})
+                  body: JSON.stringify(bodyParams)
               }).then(response => response.json())
                 .then(async (data2) => {
                     //console.log(data2);
