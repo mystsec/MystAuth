@@ -158,9 +158,12 @@ def checkURL(url, host):
     scheme = url.scheme
     return origin == host and scheme == 'https'
 
-def getRedirectURL(url, usr, token):
+def getRedirectURL(url, usr, token, state=False):
     url = prepURL(url)
-    url = addURLParams(url, {'usr': usr, 'token': token})
+    params = {'usr': usr, 'token': token}
+    if state:
+        params['state'] = state
+    url = addURLParams(url, params)
     return url
 
 def addURLParams(url, nparams):
