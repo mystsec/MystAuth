@@ -274,7 +274,10 @@ def userRegister(request):
     getOrigin.apiTokens = getOrigin.apiTokens - 1
     getOrigin.save()
     token = generateToken(oid, usr, 45)
-    redirectURL = getRedirectURL(ref, usr, token)
+    if 'state' in body:
+        redirectURL = getRedirectURL(ref, usr, token, body['state'])
+    else:
+        redirectURL = getRedirectURL(ref, usr, token)
     return JsonResponse(['success', redirectURL], safe=False)
 
 def resetRegister(request):
@@ -316,7 +319,10 @@ def resetRegister(request):
         getUser.pbk = byTob64(pbk)
         getUser.signCount = 0
         getUser.save()
-        redirectURL = getRedirectURL(ref, usr, auth['token'])
+        if 'state' in body:
+            redirectURL = getRedirectURL(ref, usr, token, body['state'])
+        else:
+            redirectURL = getRedirectURL(ref, usr, token)
         return JsonResponse(['success', redirectURL], safe=False)
     elif 'Time' in auth['info']:
         return JsonResponse(['failed', 'Session Timed Out! Request New Reset Link'], safe=False)
@@ -391,7 +397,10 @@ def userAuthenticate(request):
     getUser.save()
 
     token = generateToken(oid, usr, 45)
-    redirectURL = getRedirectURL(ref, usr, token)
+    if 'state' in body:
+        redirectURL = getRedirectURL(ref, usr, token, body['state'])
+    else:
+        redirectURL = getRedirectURL(ref, usr, token)
     return JsonResponse(['success', redirectURL], safe=False)
 
 def editOrigin(request):
