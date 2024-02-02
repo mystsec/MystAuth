@@ -76,6 +76,8 @@ def originAuth(request):
                     data['hovclr'] = re.sub(r'[^a-zA-Z0-9]', '', request.GET.get('hovclr'))
                 if 'usr' in request.GET:
                     data['usr'] = re.sub(r'[^a-zA-Z0-9_-]', '', request.GET.get('usr'))
+                elif oid in request.COOKIES:
+                    data['usr'] = request.COOKIES.get(oid)
                 if 'rst' in request.GET:
                     rst = request.GET.get('rst')
                     checkRst = checkURL(rst, oid)
@@ -130,6 +132,7 @@ def resetAuth(request):
     else:
         return render(request, 'block.html')
 
+
 def userRegOpts(request):
     body = json.loads(request.body.decode('utf-8'))
     username = body['usr']
@@ -178,6 +181,22 @@ def userRegOpts(request):
 
         return JsonResponse(json_dict, safe=False)
     return JsonResponse(result, safe=False)
+
+def regDrop(request):
+    body = json.loads(request.body.decode('utf-8'))
+    username = body['usr']
+    rid = body['rid']
+    uid = body['uid']
+
+    getOrigin = Origin.objects.get(rid=rid)
+    oid = getattr(getOrigin, 'oid')
+
+    if Auth.objects.filter(user=username, uid=uid, oid=oid).exists():
+        auth = Auth.objects.get(user=username, uid=uid, oid=oid)
+        if auth.pbk == '':
+            auth.delete()
+
+    return JsonResponse({'success': True}, safe=False)
 
 def resetRegOpts(request):
     body = json.loads(request.body.decode('utf-8'))
@@ -246,10 +265,13 @@ def userRegister(request):
     getOrigin = Origin.objects.get(rid=rid)
     oid = getattr(getOrigin, 'oid')
 
+    getUser = Auth.objects.get(uid=uid)
+    usr = getUser.user
+
     if not checkURL(ref, oid):
+        Auth.objects.get(user=usr, oid=oid).delete()
         return JsonResponse(['failed', 'Unsecure Login! Please Reload and Try Again!'], safe=False)
 
-    getUser = Auth.objects.get(uid=uid)
     eChallenge = getattr(getUser, 'challenge')
     eChallenge = base64url_to_bytes(eChallenge)
 
@@ -261,11 +283,11 @@ def userRegister(request):
             expected_rp_id="mystauth.com",
         )
     except:
+        Auth.objects.get(user=usr, oid=oid).delete()
         return JsonResponse(['failed', 'Passkey Verification Failed!'], safe=False)
 
     cid = reg_verification.credential_id
     pbk = reg_verification.credential_public_key
-    usr = getUser.user
     getUser.credId = byTob64(cid)
     getUser.pbk = byTob64(pbk)
     getUser.save()
@@ -278,7 +300,9 @@ def userRegister(request):
         redirectURL = getRedirectURL(ref, usr, token, body['state'])
     else:
         redirectURL = getRedirectURL(ref, usr, token)
-    return JsonResponse(['success', redirectURL], safe=False)
+    resp = JsonResponse(['success', redirectURL], safe=False)
+    resp.set_cookie(oid, usr, samesite='Lax', secure=True, httponly=True)
+    return resp
 
 def resetRegister(request):
     body = json.loads(request.body.decode('utf-8'))
@@ -291,11 +315,11 @@ def resetRegister(request):
     getOrigin = Origin.objects.get(rid=rid)
     oid = getattr(getOrigin, 'oid')
 
-    if not checkURL(ref, oid):
-        return JsonResponse(['failed', 'Unsecure Login! Please Reload and Try Again!'], safe=False)
-
     getUser = Auth.objects.get(uid=uid)
     usr = getUser.user
+
+    if not checkURL(ref, oid):
+        return JsonResponse(['failed', 'Unsecure Login! Please Reload and Try Again!'], safe=False)
 
     auth = authenticateToken(oid, usr, mc, 45, True)
 
@@ -323,11 +347,14 @@ def resetRegister(request):
             redirectURL = getRedirectURL(ref, usr, token, body['state'])
         else:
             redirectURL = getRedirectURL(ref, usr, token)
-        return JsonResponse(['success', redirectURL], safe=False)
+        resp = JsonResponse(['success', redirectURL], safe=False)
+        resp.set_cookie(oid, usr, samesite='Lax', secure=True, httponly=True)
+        return resp
     elif 'Time' in auth['info']:
         return JsonResponse(['failed', 'Session Timed Out! Request New Reset Link'], safe=False)
     else:
         return JsonResponse(['failed', 'Authentication Failed'], safe=False)
+
 
 def userAuthOpts(request):
     body = json.loads(request.body.decode('utf-8'))
@@ -401,7 +428,9 @@ def userAuthenticate(request):
         redirectURL = getRedirectURL(ref, usr, token, body['state'])
     else:
         redirectURL = getRedirectURL(ref, usr, token)
-    return JsonResponse(['success', redirectURL], safe=False)
+    resp = JsonResponse(['success', redirectURL], safe=False)
+    resp.set_cookie(oid, usr, samesite='Lax', secure=True, httponly=True)
+    return resp
 
 def editOrigin(request):
     body = json.loads(request.body.decode('utf-8'))
@@ -421,6 +450,8 @@ def editOrigin(request):
             allowReset = body['allowReset'] == "True"
             if oid != newOid and Origin.objects.filter(oid=newOid).exists():
                 result = {'success': False, 'info': 'Origin already taken!'}
+            elif not isinstance(ttl, int) or ttl < 0:
+                result = {'success': False, 'info': 'TTL must be a positive Integer, without other characters.'}
             else:
                 auth = Origin.objects.get(oid=oid)
                 auth.oid = newOid
