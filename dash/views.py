@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .models import Acc
 from mystauth.models import Origin
+from mystauth.crypto import getState
 
 # Create your views here.
 def signout(request):
@@ -37,7 +38,10 @@ def dash(request):
         request.token = ""
         request.authenticated = ""
         return response
-    elif request.info == "Login Timed Out!":
-        return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr='+usr+'&ref=https://mystauth.com/dash#login')
     else:
-        return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&ref=https://mystauth.com/dash#login')
+        state = getState()
+        request.session['state'] = state
+        type = '#login'
+        if 's' in request.GET:
+            type = ''
+        return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&state='+state+'&ref=https://mystauth.com/dash'+type)
