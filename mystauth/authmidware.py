@@ -6,10 +6,14 @@ class MystAuthMiddleware:
         self.get_response = get_response  #initiate middleware, not special for Myst Auth
 
     def __call__(self, request, *args, **kwargs):
-        if request.path =='/dash/' and request.method == 'GET' and (('usr' in request.GET and 'token' in request.GET) or ('myst_usr' in request.COOKIES and 'myst_token' in request.COOKIES)):  #check if relevant url/cookie params exist
+        if request.path =='/dash/' and request.method == 'GET' and (('usr' in request.GET and 'token' in request.GET and 'state' in request.GET and 'state' in request.session) or ('myst_usr' in request.COOKIES and 'myst_token' in request.COOKIES)):  #check if relevant url/cookie params exist
             if 'usr' in request.GET:
                 user = request.GET.get('usr')     #get username param
                 token = request.GET.get('token')  #get auth token param
+                if request.GET.get('state') != request.session['state']:  #check that state matches
+                    request.authenticated = False                         #sets request param 'authenticated' to False
+                    request.info = "State doesn't match!"
+                    return self.get_response(request)                     #return, end authentication
             else:
                 user = request.COOKIES.get('myst_usr')     #get username cookie
                 token = request.COOKIES.get('myst_token')  #get auth token cookie
