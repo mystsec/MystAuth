@@ -9,6 +9,7 @@ urlpatterns = [
     path('auth/', views.originAuth),
     path('reset/', views.resetAuth),
     path('api/v1/user/register/get/', views.userRegOpts),
+    path('api/v1/user/register/drop/', views.regDrop),
     path('api/v1/user/register/verify/', views.userRegister),
     path('api/v1/user/authenticate/get/', views.userAuthOpts),
     path('api/v1/user/authenticate/verify/', views.userAuthenticate),
