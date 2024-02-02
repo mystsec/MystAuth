@@ -5,6 +5,7 @@ const urlParams = new URLSearchParams(queryString);
 const rid = urlParams.get('rid');
 const refLink = document.getElementById("ref").innerHTML;
 const rstLink = prepURL(document.getElementById("reset").innerHTML);
+var lastUsr = document.getElementById("usr").value;
 
 window.onload = async function() {
   if (window.location.hash == "#login")
@@ -13,8 +14,11 @@ window.onload = async function() {
   }
   if (! await checkSupport())
   {
-    document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys-work/' target='_blank'>Passkeys</a> 😢 <br><br><a href='https://passkeys.dev/device-support/#matrix' target='_blank'>Check Support</a>";
-    loading();
+    noPasskeySupport();
+  }
+  else if (! checkCookieSupport())
+  {
+    noCookieSupport();
   }
   console.log("%cStop!", "color: red; font-size: 3rem;");
   console.log("%cIf someone told you to paste anything here, they are scamming you and will compromise your secure account!", "font-size: 1.5rem;");
@@ -49,7 +53,8 @@ form.addEventListener('submit', async function(e) {
           else
           {
               data = JSON.parse(data);
-              data.user.id = str2ab(decodeBase64(data.user.id));
+              var uid = decodeBase64(data.user.id);
+              data.user.id = str2ab(uid);
               data.challenge = str2ab(decodeBase64(data.challenge));
               let publicKeyCredentialCreationOptions = data;
               //console.log(publicKeyCredentialCreationOptions);
@@ -112,6 +117,13 @@ form.addEventListener('submit', async function(e) {
                   });
               }
               catch {
+                await fetch('/api/v1/user/register/drop/', {
+                  method: "POST",
+                  mode: "same-origin",
+                  credentials: "same-origin",
+                  headers: {'X-CSRFToken': csrftoken},
+                  body: JSON.stringify({'usr': usr, 'rid': rid, 'uid': uid})
+                });
                 loaded();
                 notify("Cancelled or Failed!", 0);
               }
@@ -224,40 +236,44 @@ async function select(id) {
   let support = await checkSupport();
   let reset = document.getElementById("reset").innerHTML.length > 0;
   let resetCont = document.getElementById("reset_container");
+
+  var elements = document.querySelectorAll('[name="selection"]');
+  elements.forEach(function(element) {
+    element.setAttribute("aria-selected", "false");
+  });
+  document.getElementById(id).setAttribute("aria-selected", "true");
+  document.getElementById('notif').innerHTML = '';
+
   if (support)
   {
-    var elements = document.querySelectorAll('[name="selection"]');
-    elements.forEach(function(element) {
-      element.setAttribute("aria-selected", "false");
-    });
-    document.getElementById(id).setAttribute("aria-selected", "true");
-    document.getElementById('notif').innerHTML = '';
-    if (id === "signup") {
-      resetCont.setAttribute("hidden", "none");
-      document.getElementById("submit").innerHTML = "Create Account";
-      document.getElementById("loading_msg").innerHTML = "Use Device to Create . . .";
-      //document.getElementById("loading_msg").innerHTML = "Use USB Security Key . . .";
-    }
-    else {
-      document.getElementById("submit").innerHTML = "Log In with Passkey";
-      document.getElementById("loading_msg").innerHTML = "Authenticate Using Device . . .";
-      if (reset)
-      {
-        document.getElementById("reset_link").setAttribute("href", rstLink);
-        resetCont.removeAttribute("hidden");
+    if (checkCookieSupport())
+    {
+      if (id === "signup") {
+        resetCont.setAttribute("hidden", "none");
+        document.getElementById("submit").innerHTML = "Create Account";
+        document.getElementById("loading_msg").innerHTML = "Use Device to Create . . .";
+        lastUsr = document.getElementById("usr").value;
+        document.getElementById("usr").value = '';
       }
+      else {
+        document.getElementById("usr").value = lastUsr;
+        document.getElementById("submit").innerHTML = "Log In with Passkey";
+        document.getElementById("loading_msg").innerHTML = "Authenticate Using Device . . .";
+        if (reset)
+        {
+          document.getElementById("reset_link").setAttribute("href", rstLink);
+          resetCont.removeAttribute("hidden");
+        }
+      }
+    }
+    else
+    {
+      noCookieSupport();
     }
   }
   else
   {
-    var elements = document.querySelectorAll('[name="selection"]');
-    elements.forEach(function(element) {
-      element.setAttribute("aria-selected", "false");
-    });
-    document.getElementById(id).setAttribute("aria-selected", "true");
-    document.getElementById('notif').innerHTML = '';
-    document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys-work/' target='_blank'>Passkeys</a> 😢 <br><br><a href='https://passkeys.dev/device-support/#matrix' target='_blank'>Check Support</a>";
-    loading();
+    noPasskeySupport();
   }
 }
 
@@ -284,6 +300,10 @@ async function checkSupport() {
   }
 }
 
+function checkCookieSupport() {
+  return navigator.cookieEnabled;
+}
+
 function notify(str, type) {
   let notif = document.getElementById('notif');
   if (type == 0)
@@ -299,12 +319,31 @@ function notify(str, type) {
 
 function loading() {
   document.getElementById("auth_form_container").setAttribute("hidden", "none");
+  document.getElementById("reset_container").setAttribute("hidden", "none")
   document.getElementById("loading_container").removeAttribute("hidden");
 }
 
 function loaded() {
   document.getElementById("loading_container").setAttribute("hidden", "none");
   document.getElementById("auth_form_container").removeAttribute("hidden");
+  let reset = document.getElementById("reset").innerHTML.length > 0;
+  let resetCont = document.getElementById("reset_container");
+  if (reset)
+  {
+    resetCont.removeAttribute("hidden");
+  }
+}
+
+function noPasskeySupport()
+{
+  document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys-work/' target='_blank'>Passkeys</a> 😢 <br><br><a href='https://passkeys.dev/d>
+  loading();
+}
+
+function noCookieSupport()
+{
+  document.getElementById("loading_msg").innerHTML = "Please Enable Cookies <br><br> <a href='https://mystauth.com/privacy/#kix.sbkz6l6dox82' target='_blank'>Only used to Identify and Secure Account</a>";
+  loading();
 }
 
 function onlySpaces(str)
