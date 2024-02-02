@@ -5,6 +5,8 @@ var csrftoken = document.querySelector("input[name='csrfmiddlewaretoken']").valu
 const usr = document.getElementById("usr").innerHTML;
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
+const initOID = document.getElementById("oid").value;
+const initTTL = document.getElementById("ttl").value;
 
 document.getElementById('hnm').onclick = function() {
   window.open('/');
@@ -13,6 +15,7 @@ document.getElementById('hnm').onclick = function() {
 window.onload = function() {
   urlParams.delete('usr');
   urlParams.delete('token');
+  urlParams.delete('state');
   let url = window.location.pathname + '?' + urlParams.toString() + window.location.hash;
   window.history.replaceState({}, "",  url);
 };
@@ -24,7 +27,7 @@ document.getElementById("signout").onclick = async function() {
     credentials: "same-origin",
     headers: {'X-CSRFToken': csrftoken}
   }).then(response => {
-    window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&ref=https://mystauth.com/dash#login";
+    window.location.href = "/dash";
   });
 }
 
@@ -61,9 +64,12 @@ editForm.addEventListener('submit', async function(e) {
         else
         {
           notify(data['info'], 0, 'edit');
+          document.getElementById("key").value = "";
+          document.getElementById("oid").value = initOID;
+          document.getElementById("ttl").value = initTTL;
           if (data['info'].includes("Time"))
           {
-            window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr="+usr+"&ref=https://mystauth.com/dash#login";
+            window.location.href = "/dash";
           }
         }
       });
@@ -96,9 +102,10 @@ cycForm.addEventListener('submit', async function(e) {
         else
         {
           notify(data['info'], 0, 'cyc');
+          document.getElementById("key").value = "";
           if (data['info'].includes("Time"))
           {
-            window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr="+usr+"&ref=https://mystauth.com/dash#login";
+            window.location.href = "/dash";
           }
         }
       });
@@ -131,9 +138,10 @@ delForm.addEventListener('submit', async function(e) {
         else
         {
           notify(data['info'], 0, 'del');
+          document.getElementById("key").value = "";
           if (data['info'].includes("Time"))
           {
-            window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr="+usr+"&ref=https://mystauth.com/dash#login";
+            window.location.href = "/dash";
           }
         }
       });
