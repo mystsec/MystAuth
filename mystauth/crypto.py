@@ -68,6 +68,9 @@ def getUID():
 def getUUIDHex():
     return uuid.uuid4().hex
 
+def getState():
+    return secrets.token_hex(32)
+
 
 #Generate Hash Materials
 def getHashMat():
