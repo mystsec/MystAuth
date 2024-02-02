@@ -10,6 +10,7 @@ document.getElementById('hnm').onclick = function() {
 window.onload = function() {
   urlParams.delete('usr');
   urlParams.delete('token');
+  urlParams.delete('state');
   let url = window.location.pathname + '?' + urlParams.toString() + window.location.hash;
   window.history.replaceState({}, "",  url);
 };
@@ -21,7 +22,7 @@ document.getElementById("signout").onclick = async function() {
     credentials: "same-origin",
     headers: {'X-CSRFToken': csrftoken}
   }).then(response => {
-    window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&ref=https://mystauth.com/dash#login";
+    window.location.href = "/dash";
   });
 }
 
@@ -54,7 +55,7 @@ form.addEventListener('submit', async function(e) {
             notify(data['info'], 0);
             if (data['info'].includes("Time"))
             {
-              window.location.href = "/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&usr="+usr+"&ref=https://mystauth.com/dash#login";
+              window.location.href = "/dash";
             }
           }
       });
