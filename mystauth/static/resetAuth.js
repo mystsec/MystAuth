@@ -9,9 +9,11 @@ var token = document.getElementById("token").innerHTML;
 window.onload = async function() {
   if (! await checkSupport())
   {
-    document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys-work/' target='_blank'>Passkeys</a> 😢 <br><br><a href='https://passkeys.dev/device-support/#matrix' target='_blank'>Check Support</a>";
-    loading();
-    loading();
+    noPasskeySupport();
+  }
+  else if (! checkCookieSupport())
+  {
+    noCookieSupport();
   }
   console.log("%cStop!", "color: red; font-size: 3rem;");
   console.log("%cIf someone told you to paste anything here, they are scamming you and will compromise your secure account!", "font-size: 1.5rem;");
@@ -135,6 +137,10 @@ async function checkSupport() {
   }
 }
 
+function checkCookieSupport() {
+  return navigator.cookieEnabled;
+}
+
 function notify(str, type) {
   let notif = document.getElementById('notif');
   if (type == 0)
@@ -156,6 +162,18 @@ function loading() {
 function loaded() {
   document.getElementById("loading_container").setAttribute("hidden", "none");
   document.getElementById("auth_form_container").removeAttribute("hidden");
+}
+
+function noPasskeySupport()
+{
+  document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys-work/' target='_blank'>Passkeys</a> 😢 <br><br><a href='https://>
+  loading();
+}
+
+function noCookieSupport()
+{
+  document.getElementById("loading_msg").innerHTML = "Please Enable Cookies <br><br> <a href='https://mystauth.com/privacy' target='_blank'>Only used to Identify and Secure Account</a>";
+  loading();
 }
 
 function onlySpaces(str)
