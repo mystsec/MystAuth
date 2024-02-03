@@ -38,6 +38,11 @@ def dash(request):
         request.token = ""
         request.authenticated = ""
         return response
+    elif request.info == "Login Timed Out!":
+        state = getState()
+        request.session['state'] = state
+        userParam = '&usr='+request.user
+        return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&state='+state+userParam+'&ref=https://mystauth.com/dash#login')
     else:
         state = getState()
         request.session['state'] = state
