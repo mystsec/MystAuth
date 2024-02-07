@@ -7,7 +7,7 @@ cbor2==5.5.1
 certifi==2023.11.17
 cffi==1.16.0
 charset-normalizer==3.3.2
-cryptography==41.0.7
+cryptography==42.0.2
 Django==5.0.1
 django-environ==0.11.2
 fastpbkdf2==0.2
@@ -16,7 +16,7 @@ mysqlclient==2.2.1
 pycparser==2.21
 pydantic==2.5.3
 pydantic_core==2.14.6
-pyOpenSSL==23.3.0
+pyOpenSSL==24.0.0
 pytz==2023.3.post1
 requests==2.31.0
 six==1.16.0
