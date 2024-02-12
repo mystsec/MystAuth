@@ -42,11 +42,11 @@ def dash(request):
         state = getState()
         request.session['state'] = state
         userParam = '&usr='+request.user
-        return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&state='+state+userParam+'&ref=https://mystauth.com/dash#login')
+        return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&state='+state+userParam+'&ref=https://mystauth.com/dash/#login')
     else:
         state = getState()
         request.session['state'] = state
         type = '#login'
         if 's' in request.GET:
             type = ''
-        return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&state='+state+'&ref=https://mystauth.com/dash'+type)
+        return redirect('https://mystauth.com/auth/?rid=0e3b8c98b34e43a5885e41061d15bce2&img=RdELgb1bNz8&state='+state+'&ref=https://mystauth.com/dash/'+type)
