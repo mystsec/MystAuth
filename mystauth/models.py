@@ -10,6 +10,7 @@ class Auth(models.Model):
     signCount = models.PositiveBigIntegerField(default=0)
     oid = models.TextField(editable=False, default="None")
     timestamp = models.DateTimeField(auto_now=False, auto_now_add=True)
+    fdata = models.TextField(null=True)
 
 class Origin(models.Model):
     oid = models.TextField() #unique
@@ -32,3 +33,8 @@ class Token(models.Model):
     salt = models.TextField(editable=False, null=True)
     timestamp = models.DateTimeField(auto_now=False, auto_now_add=True)
     ttl = models.PositiveBigIntegerField(default=120) #seconds
+    rst = models.BooleanField(default=False)
+    nonce = models.TextField(null=True)
+    key = models.TextField(null=True)
+    fkey = models.TextField(null=True)
+    edata = models.TextField(null=True)
