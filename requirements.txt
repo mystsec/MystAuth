@@ -7,7 +7,7 @@ cbor2==5.5.1
 certifi==2023.11.17
 cffi==1.16.0
 charset-normalizer==3.3.2
-cryptography==42.0.2
+cryptography==42.0.5
 Django==5.0.1
 django-environ==0.11.2
 fastpbkdf2==0.2
