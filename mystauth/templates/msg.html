@@ -8,7 +8,7 @@
     <style>
         @font-face {
         font-family: "Raleway";
-        src: url(../static/Raleway-Regular.ttf);
+        src: url(../../static/Raleway-Regular.ttf);
         }
 
         body {
@@ -34,7 +34,7 @@
     </style>
   </head>
   <body>
-    <h1>{{ msg }}</h1>
-        <script></script>
+    <h1 {% if link %}style="cursor: pointer;" onclick="window.location.href = '{{ link }}';"{% endif %}>{{ msg }}</h1>
+	<script></script>
   </body>
 </html>
