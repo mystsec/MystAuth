@@ -7,6 +7,8 @@
     <title>Secure Login</title>
     <link rel="preload" href="../static/resetAuth.css" as="style">
     <link rel="preload" href="../static/resetAuth.js" as="script">
+    <link rel="preload" href="../static/helpers.js" as="script">
+    <link rel="preload" href="../static/crypto.js" as="script">
     {% if img %}
     <link rel="preload" href="../static/bgimages/{{ img }}.webp" as="image">
     {% endif %}
@@ -68,10 +70,13 @@
     {% endif %}
     <div hidden="none">
         <div id="bioOnly">{{ bioOnly }}</div>
+        <div id="eks">{{ eks }}</div>
         <div id="getUser">{{ usr }}</div>
         <div id="ref">{{ ref }}</div>
         <div id="token">{{ token }}</div>
     </div>
-        <script src="../static/resetAuth.js"></script>
+    <script src="../static/crypto.js"></script>
+    <script src="../static/helpers.js"></script>
+    <script src="../static/resetAuth.js"></script>
   </body>
 </html>
