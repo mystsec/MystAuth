@@ -7,6 +7,7 @@ urlpatterns = [
     path('terms/', views.terms),
     path('privacy/', views.privacy),
     path('auth/', views.originAuth),
+    path('authorize/', views.oidcAuth),
     path('reset/', views.resetAuth),
     path('api/v1/user/register/get/', views.userRegOpts),
     path('api/v1/user/register/drop/', views.regDrop),
@@ -22,5 +23,6 @@ urlpatterns = [
     path('api/v1/origin/delete/', views.delAPI),
     path('api/v1/user/delete/', views.delAccount),
     path('api/v1/user/reset/', views.newResetLink),
+    path('.well-known/openid-configuration/', views.oidcConfig),
+    path('api/v1/certs/', views.oidcSigningCerts),
 ]
-
