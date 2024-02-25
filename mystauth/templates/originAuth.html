@@ -8,6 +8,8 @@
     <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
     <link rel="preload" href="../static/originAuth.css" as="style">
     <link rel="preload" href="../static/originAuth.js" as="script">
+    <link rel="preload" href="../static/helpers.js" as="script">
+    <link rel="preload" href="../static/crypto.js" as="script">
     {% if img %}
     <link rel="preload" href="../static/bgimages/{{ img }}.webp" as="image">
     {% endif %}
@@ -72,9 +74,17 @@
         <a href="https://unsplash.com/photos/{{ img }}" id="imgurl" target="_blank">Image from Unsplash</a>
     </div>
     {% endif %}
-    <div id="bioOnly" hidden="none">{{ bioOnly }}</div>
-    <div id="ref" hidden="none">{{ ref }}</div>
-    <div id="reset" hidden="none">{{ reset }}</div>
+    <div hidden="none">
+        <div id="bioOnly">{{ bioOnly }}</div>
+        <div id="eks">{{ eks }}</div>
+        <div id="eksF">{{ eksF }}</div>
+        <div id="ref">{{ ref }}</div>
+        <div id="reset">{{ reset }}</div>
+        <div id="rid">{{ rid }}</div>
+        <div id="display">{{ display }}</div>
+    </div>
+    <script src="../static/crypto.js"></script>
+    <script src="../static/helpers.js"></script>
     <script src="../static/originAuth.js"></script>
   </body>
 </html>
