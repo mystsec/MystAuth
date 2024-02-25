@@ -2,12 +2,22 @@ var form = document.getElementById("auth_form");
 var csrftoken = document.querySelector("input[name='csrfmiddlewaretoken']").value;
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
-const rid = urlParams.get('rid');
+const rid = document.getElementById("rid").innerHTML;
 const refLink = document.getElementById("ref").innerHTML;
 const rstLink = prepURL(document.getElementById("reset").innerHTML);
+const eks = document.getElementById("eks").innerHTML == "True";
+var eksF = document.getElementById("eksF").innerHTML == "True";
+const isPopup = document.getElementById("display").innerHTML == "popup";
 var lastUsr = document.getElementById("usr").value;
+var isLoading = false;
+var nativeKeys = false;
+var eKeys = "";
+var fKeys = "";
+var fData = "";
+var eData = "";
 
 window.onload = async function() {
+  document.getElementById("usr").value = "";
   if (window.location.hash == "#login")
   {
     select("signin");
@@ -30,7 +40,11 @@ form.addEventListener('submit', async function(e) {
   let usr = document.getElementById("usr").value;
   let t1 = document.getElementById("signup").getAttribute("aria-selected") === 'true';
   let t2 = document.getElementById("signin").getAttribute("aria-selected") === 'true';
-  if (!onlySpaces(usr) && t1) {
+  if (usr.length > 255)
+  {
+    notify("Username must be less than 255 characters!", 0);
+  }
+  else if (!onlySpaces(usr) && t1) {
     loading();
 
     if (/^[a-zA-Z0-9_-]+$/.test(usr))
@@ -41,7 +55,7 @@ form.addEventListener('submit', async function(e) {
           mode: "same-origin",
           credentials: "same-origin",
           headers: {'X-CSRFToken': csrftoken},
-          body: JSON.stringify({'usr': usr, 'rid': rid})
+          body: JSON.stringify({'usr': usr, 'rid': rid, 'eks': eks})
       }).then(response => response.json())
         .then(async (data) => {
           //console.log(data);
@@ -84,39 +98,61 @@ form.addEventListener('submit', async function(e) {
                 //console.log(cred);
                 //console.log(JSON.stringify(credential));
 
-                let bodyParams = {'resp': cred, 'uid': ab2str(data.user.id), 'rid': rid, 'ref': refLink};
-
-                if (urlParams.has("state"))
+                if (eks)
                 {
-                  bodyParams.state = urlParams.get("state");
+                  document.getElementById("loading_msg").innerHTML = "Securing Encryption Keys ...";
+                  let extResults = credential.getClientExtensionResults();
+
+                  var keyData = await generate_AES_KEY();
+                  var secretStr = keyData[1] + ":" + keyData[2];
+                  let ek = await RSA_ENCRYPT(urlParams.get('pbk'), keyData[0]);
+                  eKeys = b64_to_b64url(ek);
+
+                  if (eksF)
+                  {
+                    var fKeyData = await generate_AES_KEY();
+                    let fk = await RSA_ENCRYPT(urlParams.get('pbk'), fKeyData[0]);
+                    fKeys = b64_to_b64url(fk);
+                    let fd = await AES_ENCRYPT(fKeyData[0], keyData[0]);
+                    fData = b64_to_b64url(fd[0]) + ":" + b64_to_b64url(fd[1]);
+                  }
+
+                  if (typeof extResults.largeBlob !== "undefined" && (extResults.largeBlob || extResults.largeBlob.supported))
+                  {
+                    document.getElementById("loading_msg").innerHTML = "Verify One More Time ...";
+
+                    let publicKeyCredentialRequestOptions = {
+                      challenge: data.challenge,
+                      rpId: "localhost",
+                      timeout: 60000,
+                      allowCredentials: [{
+                        type: "public-key",
+                        id: credential.rawId,
+                      }],
+                      extensions: {
+                        largeBlob: {
+                          write: Uint8Array.from(secretStr.split("").map(c => c.codePointAt(0))),
+                        },
+                      },
+                    };
+                    navigator.credentials.get({
+                        publicKey: publicKeyCredentialRequestOptions
+                    }).then(async (assertion) => {
+                      nativeKeys = assertion.getClientExtensionResults().largeBlob.written;
+                      registerUser(cred, data);
+                    });
+                  }
+                  else
+                  {
+                    registerUser(cred, data);
+                  }
                 }
-
-                //Register Credential on Server
-                await fetch('/api/v1/user/register/verify/', {
-                    method: "POST",
-                    mode: "same-origin",
-                    credentials: "same-origin",
-                    headers: {'X-CSRFToken': csrftoken},
-                    body: JSON.stringify(bodyParams)
-                }).then(response => response.json())
-                  .then(async (data2) => {
-                      //console.log(data2);
-                      loaded();
-                      if (data2[0] == 'success')
-                      {
-                        document.getElementById("usr").value = '';
-                        document.getElementById("loading_msg").innerHTML = "Account Created, Redirecting . . .";
-                        loading();
-
-                        window.location.href = data2[1];
-                      }
-                      else
-                      {
-                        notify(data2[1], 0);
-                      }
-                  });
+                else
+                {
+                  registerUser(cred, data);
+                }
               }
-              catch {
+              catch (e) {
                 await fetch('/api/v1/user/register/drop/', {
                   method: "POST",
                   mode: "same-origin",
@@ -126,6 +162,9 @@ form.addEventListener('submit', async function(e) {
                 });
                 loaded();
                 notify("Cancelled or Failed!", 0);
+                console.log(e.stack);
+                console.log(e.name);
+                console.log(e.message);
               }
 
           }
@@ -147,7 +186,7 @@ form.addEventListener('submit', async function(e) {
         mode: "same-origin",
         credentials: "same-origin",
         headers: {'X-CSRFToken': csrftoken},
-        body: JSON.stringify({'usr': usr, 'rid': rid})
+        body: JSON.stringify({'usr': usr, 'rid': rid, 'eks': eks})
     }).then(response => response.json())
       .then(async (data) => {
         //console.log(data);
@@ -159,6 +198,19 @@ form.addEventListener('submit', async function(e) {
         else
         {
             data = JSON.parse(data);
+            if (eks)
+            {
+              fData = data.fdata;
+              if (fData == null)
+              {
+                eksF = false;
+              }
+              else
+              {
+                eksF = true;
+              }
+              delete data['fdata']
+            }
             data.allowCredentials[0].id = str2ab(decodeBase64(data.allowCredentials[0].id));
             data.challenge = str2ab(decodeBase64(data.challenge));
             let publicKeyCredentialRequestOptions = data;
@@ -187,41 +239,41 @@ form.addEventListener('submit', async function(e) {
               //console.log(cred);
               //console.log(JSON.stringify(credential));
 
-              let bodyParams = {'resp': cred, 'usr': usr, 'rid': rid, 'ref': refLink};
-
-              if (urlParams.has("state"))
+              if (eks)
               {
-                bodyParams.state = urlParams.get("state");
+                document.getElementById("loading_msg").innerHTML = "Securing Encryption Keys ...";
+                if (typeof assertion.getClientExtensionResults().largeBlob == "undefined" || typeof assertion.getClientExtensionResults().largeBlob.blob == "undefined")
+                {
+                  if (eksF)
+                  {
+                    let ed = await RSA_ENCRYPT(urlParams.get('pbk'), fData);
+                    eData = b64_to_b64url(ed);
+                  }
+                }
+                else
+                {
+                  nativeKeys = true;
+                  let secretStr = String.fromCodePoint(...new Uint8Array(assertion.getClientExtensionResults().largeBlob.blob));
+                  secretStr = secretStr.split(":");
+                  var seed = secretStr[0];
+                  var salt = secretStr[1];
+                  var key = await derive_AES_KEY(seed, salt);
+                  let ek = await RSA_ENCRYPT(urlParams.get('pbk'), key);
+                  eKeys = b64_to_b64url(ek);
+                }
+                authenticateUser(cred, usr);
               }
-
-              //Authenticate with Server
-              await fetch('/api/v1/user/authenticate/verify/', {
-                  method: "POST",
-                  mode: "same-origin",
-                  credentials: "same-origin",
-                  headers: {'X-CSRFToken': csrftoken},
-                  body: JSON.stringify(bodyParams)
-              }).then(response => response.json())
-                .then(async (data2) => {
-                    //console.log(data2);
-                    loaded();
-                    if (data2[0] == 'success')
-                    {
-                      document.getElementById("usr").value = '';
-                      document.getElementById("loading_msg").innerHTML = "Success, Redirecting . . .";
-                      loading();
-
-                      window.location.href = data2[1];
-                    }
-                    else
-                    {
-                      notify(data2[1], 0);
-                    }
-                });
+              else
+              {
+                authenticateUser(cred, usr);
+              }
             }
-            catch {
+            catch (e) {
               loaded();
               notify("Cancelled or Failed!", 0);
+              console.log(e.stack);
+              console.log(e.name);
+              console.log(e.message);
             }
         }
       });
@@ -232,98 +284,193 @@ form.addEventListener('submit', async function(e) {
   }
 });
 
-async function select(id) {
-  let support = await checkSupport();
-  let reset = document.getElementById("reset").innerHTML.length > 0;
-  let resetCont = document.getElementById("reset_container");
+async function registerUser(cred, data)
+{
+  var bodyParams = {'resp': cred, 'uid': ab2str(data.user.id), 'rid': rid, 'ref': refLink};
 
-  var elements = document.querySelectorAll('[name="selection"]');
-  elements.forEach(function(element) {
-    element.setAttribute("aria-selected", "false");
-  });
-  document.getElementById(id).setAttribute("aria-selected", "true");
-  document.getElementById('notif').innerHTML = '';
-
-  if (support)
+  if (eks)
   {
-    if (checkCookieSupport())
+    if (nativeKeys || eksF)
     {
-      if (id === "signup") {
-        resetCont.setAttribute("hidden", "none");
-        document.getElementById("submit").innerHTML = "Create Account";
-        document.getElementById("loading_msg").innerHTML = "Use Device to Create . . .";
-        lastUsr = document.getElementById("usr").value;
-        document.getElementById("usr").value = '';
-      }
-      else {
-        document.getElementById("usr").value = lastUsr;
-        document.getElementById("submit").innerHTML = "Log In with Passkey";
-        document.getElementById("loading_msg").innerHTML = "Authenticate Using Device . . .";
-        if (reset)
+      bodyParams.ekeys = eKeys;
+    }
+    else
+    {
+      bodyParams.eksUnavailable = "True";
+    }
+
+    if (eksF)
+    {
+      bodyParams.fkeys = fKeys;
+      bodyParams.fdata = fData;
+    }
+    bodyParams.nativekeys = nativeKeys;
+  }
+
+  if (urlParams.has("state"))
+  {
+    bodyParams.state = urlParams.get("state");
+  }
+
+  if (window.location.pathname == "/authorize/")
+  {
+    bodyParams.nonce = urlParams.get("nonce");
+    bodyParams.response_type = urlParams.get("response_type");
+    bodyParams.scope = urlParams.get("scope");
+  }
+  else
+  {
+    bodyParams.response_type = "myst";
+  }
+
+  console.log(bodyParams);
+
+  //Register Credential on Server
+  await fetch('/api/v1/user/register/verify/', {
+      method: "POST",
+      mode: "same-origin",
+      credentials: "same-origin",
+      headers: {'X-CSRFToken': csrftoken},
+      body: JSON.stringify(bodyParams)
+  }).then(response => response.json())
+    .then(async (data2) => {
+        //console.log(data2);
+        loaded();
+        if (data2[0] == 'success')
         {
-          document.getElementById("reset_link").setAttribute("href", rstLink);
-          resetCont.removeAttribute("hidden");
+          document.getElementById("usr").value = '';
+          document.getElementById("loading_msg").innerHTML = "Account Created, Redirecting . . .";
+          loading();
+
+          window.location.href = data2[1];
+        }
+        else
+        {
+          notify(data2[1], 0);
+        }
+    });
+}
+
+async function authenticateUser(cred, usr)
+{
+  var bodyParams = {'resp': cred, 'usr': usr, 'rid': rid, 'ref': refLink};
+
+  if (eks)
+  {
+    if (eKeys != "")
+    {
+      bodyParams.ekeys = eKeys;
+    }
+    else if (eData != "")
+    {
+      bodyParams.edata = eData;
+    }
+    else
+    {
+      bodyParams.eksUnavailable = "True";
+    }
+  }
+
+  if (urlParams.has("state"))
+  {
+    bodyParams.state = urlParams.get("state");
+  }
+
+  if (window.location.pathname == "/authorize/")
+  {
+    bodyParams.nonce = urlParams.get("nonce");
+    bodyParams.response_type = urlParams.get("response_type");
+    bodyParams.scope = urlParams.get("scope");
+  }
+  else
+  {
+    bodyParams.response_type = "myst";
+  }
+
+  //Authenticate with Server
+  await fetch('/api/v1/user/authenticate/verify/', {
+      method: "POST",
+      mode: "same-origin",
+      credentials: "same-origin",
+      headers: {'X-CSRFToken': csrftoken},
+      body: JSON.stringify(bodyParams)
+  }).then(response => response.json())
+    .then(async (data2) => {
+        //console.log(data2);
+        loaded();
+        if (data2[0] == 'success')
+        {
+          document.getElementById("usr").value = '';
+          document.getElementById("loading_msg").innerHTML = "Success, Redirecting . . .";
+          loading();
+
+          window.location.href = data2[1];
+        }
+        else
+        {
+          notify(data2[1], 0);
+        }
+    });
+}
+
+async function select(id) {
+  if (!isLoading)
+  {
+    let support = await checkSupport();
+    let reset = document.getElementById("reset").innerHTML.length > 0;
+    let resetCont = document.getElementById("reset_container");
+
+    var elements = document.querySelectorAll('[name="selection"]');
+    elements.forEach(function(element) {
+      element.setAttribute("aria-selected", "false");
+    });
+    document.getElementById(id).setAttribute("aria-selected", "true");
+    document.getElementById('notif').innerHTML = '';
+
+    if (support)
+    {
+      if (checkCookieSupport())
+      {
+        if (id === "signup") {
+          resetCont.setAttribute("hidden", "none");
+          document.getElementById("submit").innerHTML = "Create Account";
+          document.getElementById("loading_msg").innerHTML = "Use Device to Create . . .";
+          lastUsr = document.getElementById("usr").value;
+          document.getElementById("usr").value = '';
+        }
+        else {
+          document.getElementById("usr").value = lastUsr;
+          document.getElementById("submit").innerHTML = "Log In with Passkey";
+          document.getElementById("loading_msg").innerHTML = "Authenticate Using Device . . .";
+          if (reset)
+          {
+            document.getElementById("reset_link").setAttribute("href", rstLink);
+            resetCont.removeAttribute("hidden");
+          }
         }
       }
+      else
+      {
+        noCookieSupport();
+      }
     }
     else
     {
-      noCookieSupport();
+      noPasskeySupport();
     }
   }
-  else
-  {
-    noPasskeySupport();
-  }
 }
 
-async function checkSupport() {
-  let bioOnly = document.getElementById("bioOnly").innerHTML == "True";
-  if (window.PublicKeyCredential) {
-    if (!bioOnly)
-    {
-      return true;
-    }
-    else
-    {
-      let plat = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-      if (plat) {
-        return true;
-      }
-      else {
-        return false;
-      }
-    }
-  }
-  else {
-    return false;
-  }
-}
-
-function checkCookieSupport() {
-  return navigator.cookieEnabled;
-}
-
-function notify(str, type) {
-  let notif = document.getElementById('notif');
-  if (type == 0)
-  {
-    notif.setAttribute('success', 'false');
-  }
-  else
-  {
-    notif.setAttribute('success', 'true');
-  }
-  notif.innerHTML = str;
-}
-
-function loading() {
+function loading()
+{
   document.getElementById("auth_form_container").setAttribute("hidden", "none");
   document.getElementById("reset_container").setAttribute("hidden", "none")
   document.getElementById("loading_container").removeAttribute("hidden");
+  isLoading = true;
 }
 
-function loaded() {
+function loaded()
+{
   document.getElementById("loading_container").setAttribute("hidden", "none");
   document.getElementById("auth_form_container").removeAttribute("hidden");
   let reset = document.getElementById("reset").innerHTML.length > 0;
@@ -332,299 +479,5 @@ function loaded() {
   {
     resetCont.removeAttribute("hidden");
   }
-}
-
-function noPasskeySupport()
-{
-  document.getElementById("loading_msg").innerHTML = "Your Device/Browser Doesn't Support <a href='https://blog.google/inside-google/googlers/ask-a-techspert/how-passkeys-work/' target='_blank'>Passkeys</a> 😢 <br><br><a href='https://passkeys.dev/d>
-  loading();
-}
-
-function noCookieSupport()
-{
-  document.getElementById("loading_msg").innerHTML = "Please Enable Cookies <br><br> <a href='https://mystauth.com/privacy/#kix.sbkz6l6dox82' target='_blank'>Only used to Identify and Secure Account</a>";
-  loading();
-}
-
-function onlySpaces(str)
-{
-  return str.replace(/\s/g, '').length == 0;
-}
-
-function prepURL(url)
-{
-  url = decodeURIComponent(url);
-  return url.replace(/"/g, "%22").replace(/'/g, "%27").replace(/</g, "%3C").replace(/>/g, "%3E");
-}
-
-/*
-Convert  an ArrayBuffer into a string
-from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
-*/
-function ab2str(buf) {
-  return String.fromCharCode.apply(null, new Uint8Array(buf));
-}
-
-/*
- Convert a string into an ArrayBuffer
- from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
- */
- function str2ab(str) {
-   const buf = new ArrayBuffer(str.length);
-   const bufView = new Uint8Array(buf);
-   for (let i = 0, strLen = str.length; i < strLen; i++) {
-     bufView[i] = str.charCodeAt(i);
-   }
-   return buf;
- }
-
- //https://stackoverflow.com/questions/9267899/arraybuffer-to-base64-encoded-string
- function ab2b64( buffer ) {
-     var binary = '';
-     var bytes = new Uint8Array( buffer );
-     var len = bytes.byteLength;
-     for (var i = 0; i < len; i++) {
-         binary += String.fromCharCode( bytes[ i ] );
-     }
-     return window.btoa( binary );
- }
-
- //https://stackoverflow.com/questions/21797299/convert-base64-string-to-arraybuffer
- function b642ab(base64) {
-     var binaryString = atob(base64);
-     var bytes = new Uint8Array(binaryString.length);
-     for (var i = 0; i < binaryString.length; i++) {
-         bytes[i] = binaryString.charCodeAt(i);
-     }
-     return bytes.buffer;
- }
-
- function encode_utf8(s) {
-   return unescape(encodeURIComponent(s));
- }
-
- function decode_utf8(s) {
-   return decodeURIComponent(escape(s));
- }
-
- function decodeU8A(arr) {
-   return new TextDecoder().decode(arr);
- }
-
- function base64decode(str) {
-   let decode = atob(str).replace(/[\x80-\uffff]/g, (m) => `%${m.charCodeAt(0).toString(16).padStart(2, '0')}`)
-   return decodeURIComponent(decode)
- }
-
- function decodeBase64(s) {
-     var e={},i,b=0,c,x,l=0,a,r='',w=String.fromCharCode,L=s.length;
-     var A="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-     for(i=0;i<64;i++){e[A.charAt(i)]=i;}
-     for(x=0;x<L;x++){
-         c=e[s.charAt(x)];b=(b<<6)+c;l+=6;
-         while(l>=8){((a=(b>>>(l-=8))&0xff)||(x<(L-2)))&&(r+=w(a));}
-     }
-     return r;
- }
-
- function b64_to_b64url(s) {
-   return s.replace(/\+/g, '-').replace(/\//g, '_');
- }
-
- function b64url_to_b64(s) {
-   return s.replace(/-/g, '+').replace(/_/g, '/');
- }
-
-function td2int(arr) {
-  t = arr[1];
-  d = arr[2];
-  let tarr = t.split(':');
-  let darr = d.split('-');
-  let tint = parseInt(tarr[0]) * 3600 + parseInt(tarr[1]) * 60 + parseInt(tarr[2]);
-  let dint = (parseInt(darr[0]) - 2020) * 365 + parseInt(darr[1]) * 30 + parseInt(darr[2]);
-  return [dint, tint];
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-async function AES_ENCRYPT(key, plaintext)
-{
-  return new Promise((resolve, reject) => {
-    let iv = window.crypto.getRandomValues(new Uint8Array(128));
-    window.crypto.subtle.importKey(
-      "raw",
-      str2ab(atob(key)),
-      'AES-GCM',
-      false,
-      ["encrypt"]
-    ).then(async (key) => {
-        await window.crypto.subtle.encrypt(
-          {name: 'AES-GCM',
-           iv: iv
-          },
-          key,
-          str2ab(plaintext)
-        ).then((ciphertext) => {
-              iv = btoa(ab2str(iv));
-              resolve([btoa(ab2str(ciphertext)), iv]);
-            });
-        });
-  });
-}
-
-async function AES_DECRYPT(key, ciphertext, iv)
-{
-  return new Promise((resolve, reject) => {
-    iv = str2ab(atob(iv));
-    window.crypto.subtle.importKey(
-      "raw",
-      str2ab(atob(key)),
-      'AES-GCM',
-      false,
-      ["decrypt"]
-    ).then(async (key) => {
-        await window.crypto.subtle.decrypt(
-          {name: 'AES-GCM',
-           iv: iv
-          },
-          key,
-          str2ab(atob(ciphertext))
-        ).then((plaintext) => {
-            resolve(ab2str(plaintext));
-        });
-    });
-  });
-}
-
-async function generate_AES_KEY()
-{
-  const iterations = 1000000;
-
-  return new Promise(async (resolve, reject) => {
-  const seed = window.crypto.getRandomValues(new Uint8Array(64));
-  const salt = window.crypto.getRandomValues(new Uint8Array(64));
-  await window.crypto.subtle.importKey(
-    'raw',
-    seed,
-    { name: 'PBKDF2' },
-    false,
-    ['deriveKey']
-  ).then(async (derivedKey) => {
-
-      await window.crypto.subtle.deriveKey(
-        {
-          name: 'PBKDF2',
-          salt,
-          iterations,
-          hash: 'SHA-512',
-        },
-        derivedKey,
-        {
-          name: 'AES-GCM',
-          length: 256,
-        },
-        true,
-        ["encrypt", "decrypt"]
-      ).then(async (keyMaterial) => {
-        await window.crypto.subtle.exportKey(
-          "raw",
-          keyMaterial
-        ).then(function(exportedSecretKey) {
-          const exportedAsString = ab2str(exportedSecretKey);
-          const exportedAsBase64 = window.btoa(exportedAsString);
-          resolve([exportedAsBase64, btoa(ab2str(seed)), btoa(ab2str(salt))]);
-
-        });
-      });
-    });
-  });
-}
-
-async function generate_AES_KEY(sd, st)
-{
-  const seed = str2ab(atob(b64url_to_b64(sd)));
-  const salt = str2ab(atob(b64url_to_b64(st)));
-  const iterations = 1000000;
-
-  return new Promise(async (resolve, reject) => {
-  await window.crypto.subtle.importKey(
-    'raw',
-    seed,
-    { name: 'PBKDF2' },
-    false,
-    ['deriveKey']
-  ).then(async (derivedKey) => {
-
-      await window.crypto.subtle.deriveKey(
-        {
-          name: 'PBKDF2',
-          salt,
-          iterations,
-          hash: 'SHA-512',
-        },
-        derivedKey,
-        {
-          name: 'AES-GCM',
-          length: 256,
-        },
-        true,
-        ["encrypt", "decrypt"]
-      ).then(async (keyMaterial) => {
-        await window.crypto.subtle.exportKey(
-          "raw",
-          keyMaterial
-        ).then(function(exportedSecretKey) {
-          const exportedAsString = ab2str(exportedSecretKey);
-          const exportedAsBase64 = window.btoa(exportedAsString);
-          resolve(exportedAsBase64);
-
-        });
-      });
-    });
-  });
-}
-
-async function generate_RSA_KEY()
-{
-  return new Promise(async (resolve, reject) => {
-    window.crypto.subtle.generateKey(
-        {
-        name: "RSA-OAEP",
-        modulusLength: 4096,
-        publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
-        hash: "SHA-256",
-        },
-        true,
-        ["encrypt", "decrypt"]
-    ).then(async (key) => {
-        await window.crypto.subtle.exportKey(
-          "jwk",
-          key.publicKey
-        ).then(async function(exportedPublicKey) {
-          let exportedPBKAsString = JSON.stringify(exportedPublicKey);
-          let exportedPBKAsBase64 = exportedPBKAsString;
-            await window.crypto.subtle.exportKey(
-              "pkcs8",
-              key.privateKey
-            ).then(async function(exportedPrivateKey) {
-              const exportedPKAsString = ab2str(exportedPrivateKey);
-              const exportedPKAsBase64 = window.btoa(exportedPKAsString);
-              resolve([exportedPBKAsBase64, exportedPKAsBase64]);
-            });
-        });
-    });
-  });
+  isLoading = false;
 }
