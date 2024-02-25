@@ -16,6 +16,7 @@ env = environ.Env()
 environ.Env.read_env()
 
 JWT_SIG_KEYS = env.list("SIG_KEYS")
+JWT_SIG_PATH = env("SIG_PATH")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
