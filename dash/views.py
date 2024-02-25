@@ -38,6 +38,8 @@ def dash(request):
         request.token = ""
         request.authenticated = ""
         return response
+    elif request.info == "State doesn't match!":
+        return render(request, 'msg.html', {'msg': 'Timed Out, Click to Retry!', 'link': 'https://mystauth.com/dash/'})
     elif request.info == "Login Timed Out!":
         state = getState()
         request.session['state'] = state
