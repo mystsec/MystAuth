@@ -27,14 +27,19 @@ from .crypto import (
     getHashMat,
     byTob64,
     b64Toby,
+    b642str,
+    b64url_to_b64,
     HASH,
     authenticate,
     validateToken,
     authenticateToken,
     generateToken,
+    tokenExchange,
     newOrigin,
     checkURL,
     getRedirectURL,
+    sigKeyIDs,
+    sigPath,
 )
 import os
 import json
@@ -50,45 +55,96 @@ def terms(request):
 def privacy(request):
     return render(request, "privacy.html")
 
+def oidcConfig(request):
+    config = {}
+    config["issuer"] = "https://mystauth.com"
+    config["authorization_endpoint"] = "https://mystauth.com/authorize"
+    config["token_endpoint"] = "https://mystauth.com/api/v1/user/token/verify"
+    config["jwks_uri"] = "https://mystauth.com/api/v1/certs"
+    config["scopes_supported"] = ["openid", "username"]
+    config["response_types_supported"] = ["code"]
+    config["subject_types_supported"] = ["pairwise"]
+    config["id_token_signing_alg_values_supported"] = ["RS256"]
+    config["ui_locales_supported"] = ["en-US", "en-CA"]
+    config["display_values_supported"] = ["page", "popup"]
+    config["op_policy_uri"] = "https://mystauth.com/privacy"
+    config["op_tos_uri"] = "https://mystauth.com/terms"
+    return JsonResponse(config)
+
+def oidcSigningCerts(request):
+    certs = {}
+    keys = []
+    for id in sigKeyIDs:
+        key = {}
+        key["kty"] = "RSA"
+        key["alg"] = "RS256"
+        key["use"] = "sig"
+        key["kid"] = id
+        with open(sigPath+'public_key_'+id+'.pem', 'r') as pbk_file:
+            pem = pbk_file.read().replace('\n', '')
+        key["pem"] = pem
+        keys.append(key)
+    certs["keys"] = keys
+    return JsonResponse(certs)
+
+def oidcAuth(request):
+    required_params = ['scope', 'client_id', 'response_type', 'redirect_uri', 'state']
+    if request.method == 'GET' and all(key in request.GET for key in required_params):
+        rid = request.GET.get('client_id')
+        ref = request.GET.get('redirect_uri')
+        return authPage(request, rid, ref)
+    else:
+        return render(request, "block.html")
+
 def originAuth(request):
     if request.method == 'GET' and 'rid' in request.GET and 'ref' in request.GET:
         rid = request.GET.get('rid')
         ref = request.GET.get('ref')
+        return authPage(request, rid, ref)
+    else:
+        return render(request, 'block.html')
 
-        try:
-            getOrigin = Origin.objects.get(rid=rid)
-            oid = getattr(getOrigin, 'oid')
-        except:
-            return render(request, 'block.html')
+def authPage(request, rid, ref):
+    try:
+        getOrigin = Origin.objects.get(rid=rid)
+        oid = getattr(getOrigin, 'oid')
+    except:
+        return render(request, 'block.html')
 
-        checkRef = checkURL(ref, oid)
+    checkRef = checkURL(ref, oid)
 
-        if checkRef:
-            if getOrigin.apiTokens != 0:
-                data = {'bioOnly': str(getOrigin.bioOnly)}
-                if 'img' in request.GET:
-                    data['img'] = re.sub(r'[^a-zA-Z0-9_-]', '', request.GET.get('img'))
-                elif 'bgclr' in request.GET:
-                    data['bgclr'] = re.sub(r'[^a-zA-Z0-9]', '', request.GET.get('bgclr'))
-                if 'clr' in request.GET:
-                    data['clr'] = re.sub(r'[^a-zA-Z0-9]', '', request.GET.get('clr'))
-                if 'hovclr' in request.GET:
-                    data['hovclr'] = re.sub(r'[^a-zA-Z0-9]', '', request.GET.get('hovclr'))
-                if 'usr' in request.GET:
-                    data['usr'] = re.sub(r'[^a-zA-Z0-9_-]', '', request.GET.get('usr'))
-                elif oid in request.COOKIES:
-                    data['usr'] = request.COOKIES.get(oid)
-                if 'rst' in request.GET:
-                    rst = request.GET.get('rst')
-                    checkRst = checkURL(rst, oid)
-                    if checkRst:
-                        data['reset'] = re.sub(r'[^a-zA-Z0-9_%/:#&=?.-]', '', rst)
-                data['ref'] = re.sub(r'[^a-zA-Z0-9_%/:#&=?.-]', '', ref)
-                return render(request, 'originAuth.html', data)
+    if checkRef:
+        data = {'bioOnly': str(getOrigin.bioOnly)}
+        if 'pbk' in request.GET and 'state' in request.GET:
+            data['eks'] = 'True'
+            if 'noFallback' in request.GET:
+                data['eksF'] = 'False'
             else:
-                return render(request, 'block.html')
+                data['eksF'] = 'True'
         else:
-            return render(request, 'block.html')
+            data['eks'] = 'False'
+        if 'img' in request.GET:
+            data['img'] = re.sub(r'[^a-zA-Z0-9_-]', '', request.GET.get('img'))
+        elif 'bgclr' in request.GET:
+            data['bgclr'] = re.sub(r'[^a-zA-Z0-9]', '', request.GET.get('bgclr'))
+        if 'clr' in request.GET:
+            data['clr'] = re.sub(r'[^a-zA-Z0-9]', '', request.GET.get('clr'))
+        if 'hovclr' in request.GET:
+            data['hovclr'] = re.sub(r'[^a-zA-Z0-9]', '', request.GET.get('hovclr'))
+        if 'display' in request.GET and request.GET.get('display') == "popup":
+            data['display'] = 'popup'
+        if 'usr' in request.GET:
+            data['usr'] = re.sub(r'[^a-zA-Z0-9_-]', '', request.GET.get('usr'))
+        elif oid in request.COOKIES:
+            data['usr'] = request.COOKIES.get(oid)
+        if 'rst' in request.GET:
+            rst = request.GET.get('rst')
+            checkRst = checkURL(rst, oid)
+            if checkRst:
+                data['reset'] = re.sub(r'[^a-zA-Z0-9_%/:#&=?.-]', '', rst)
+        data['ref'] = re.sub(r'[^a-zA-Z0-9_%/:#&=?.-]', '', ref)
+        data['rid'] = rid
+        return render(request, 'originAuth.html', data)
     else:
         return render(request, 'block.html')
 
@@ -111,6 +167,14 @@ def resetAuth(request):
             auth = authenticateToken(oid, usr, mc, 600, True, True)
             if auth['success']:
                 data = {'bioOnly': str(getOrigin.bioOnly)}
+                if 'pbk' in request.GET and 'state' in request.GET:
+                    data['eks'] = 'True'
+                    if 'noFallback' in request.GET:
+                        data['eksF'] = 'False'
+                    else:
+                        data['eksF'] = 'True'
+                else:
+                    data['eks'] = 'False'
                 if 'img' in request.GET:
                     data['img'] = re.sub(r'[^a-zA-Z0-9_-]', '', request.GET.get('img'))
                 elif 'bgclr' in request.GET:
@@ -132,17 +196,23 @@ def resetAuth(request):
     else:
         return render(request, 'block.html')
 
-
 def userRegOpts(request):
     body = json.loads(request.body.decode('utf-8'))
     username = body['usr']
     rid = body['rid']
+    eks = body['eks']
+
+    if len(username) > 255:
+        return JsonResponse(['failed', 'Username must be less than 255 characters!'], safe=False)
 
     if not re.match("^[a-zA-Z0-9_-]+$", username):
         return JsonResponse(['failed', 'Only Alphanumerics, Underscore, and Hyphen Allowed in Username'], safe=False)
 
     getOrigin = Origin.objects.get(rid=rid)
     oid = getattr(getOrigin, 'oid')
+
+    if getOrigin.apiTokens <= 0:
+        return JsonResponse(['failed', 'Contact site admin! Err: api_token_limit'], safe=False)
 
     if Auth.objects.filter(user=username, oid=oid).exists():
         result = ['failed', 'Username already taken!']
@@ -175,6 +245,10 @@ def userRegOpts(request):
         )
         json_dict = options_to_json(regOpts)
         opt_dict = json.loads(json_dict)
+
+        if eks:
+            opt_dict["extensions"] = {"largeBlob": {"support": "preferred"}}
+            json_dict = json.dumps(opt_dict)
 
         newAuth = Auth(user=username, uid=uuid, challenge=opt_dict["challenge"], oid=oid)
         newAuth.save()
@@ -213,7 +287,7 @@ def resetRegOpts(request):
     try:
         getUser = Auth.objects.get(user=username, oid=oid)
     except:
-        return JsonResponse(['failed', 'Reset Link No Longer Valid, Please Request a New One!'], safe=False)
+        return JsonResponse(['failed', 'Reset Link Timed Out, Please Request a New One!'], safe=False)
 
     auth = authenticateToken(oid, username, mc, 180, True, True)
 
@@ -253,7 +327,7 @@ def resetRegOpts(request):
     elif "Time" in auth['info']:
         return JsonResponse(['failed', 'Session Timed Out! Request New Reset Link'], safe=False)
     else:
-        return JsonResponse(['failed', 'Reset Link No Longer Valid, Please Request a New One!'], safe=False)
+        return JsonResponse(['failed', 'Reset Link Not Valid, Please Request a New One!'], safe=False)
 
 def userRegister(request):
     body = json.loads(request.body.decode('utf-8'))
@@ -290,16 +364,14 @@ def userRegister(request):
     pbk = reg_verification.credential_public_key
     getUser.credId = byTob64(cid)
     getUser.pbk = byTob64(pbk)
+    if 'fdata' in body:
+        getUser.fdata = body['fdata']
     getUser.save()
 
     getOrigin.userCount = getOrigin.userCount + 1
     getOrigin.apiTokens = getOrigin.apiTokens - 1
     getOrigin.save()
-    token = generateToken(oid, usr, 45)
-    if 'state' in body:
-        redirectURL = getRedirectURL(ref, usr, token, body['state'])
-    else:
-        redirectURL = getRedirectURL(ref, usr, token)
+    redirectURL = getRedirectURL(ref, usr, oid, body)
     resp = JsonResponse(['success', redirectURL], safe=False)
     resp.set_cookie(oid, usr, samesite='Lax', secure=True, httponly=True)
     return resp
@@ -343,10 +415,8 @@ def resetRegister(request):
         getUser.pbk = byTob64(pbk)
         getUser.signCount = 0
         getUser.save()
-        if 'state' in body:
-            redirectURL = getRedirectURL(ref, usr, token, body['state'])
-        else:
-            redirectURL = getRedirectURL(ref, usr, token)
+
+        redirectURL = getRedirectURL(ref, usr, oid, body)
         resp = JsonResponse(['success', redirectURL], safe=False)
         resp.set_cookie(oid, usr, samesite='Lax', secure=True, httponly=True)
         return resp
@@ -355,11 +425,11 @@ def resetRegister(request):
     else:
         return JsonResponse(['failed', 'Authentication Failed'], safe=False)
 
-
 def userAuthOpts(request):
     body = json.loads(request.body.decode('utf-8'))
     username = body['usr']
     rid = body['rid']
+    eks = body['eks']
 
     getOrigin = Origin.objects.get(rid=rid)
     oid = getattr(getOrigin, 'oid')
@@ -378,6 +448,10 @@ def userAuthOpts(request):
 
         json_dict = options_to_json(authOpts)
         opt_dict = json.loads(json_dict)
+        if eks:
+            opt_dict["extensions"] = {"largeBlob": {"read": True}}
+            opt_dict["fdata"] = user.fdata
+            json_dict = json.dumps(opt_dict)
 
         user.challenge = opt_dict["challenge"]
         user.save()
@@ -423,11 +497,7 @@ def userAuthenticate(request):
     usr = getUser.user
     getUser.save()
 
-    token = generateToken(oid, usr, 45)
-    if 'state' in body:
-        redirectURL = getRedirectURL(ref, usr, token, body['state'])
-    else:
-        redirectURL = getRedirectURL(ref, usr, token)
+    redirectURL = getRedirectURL(ref, usr, oid, body)
     resp = JsonResponse(['success', redirectURL], safe=False)
     resp.set_cookie(oid, usr, samesite='Lax', secure=True, httponly=True)
     return resp
@@ -449,7 +519,7 @@ def editOrigin(request):
             bioOnly = body['bioOnly'] == "True"
             allowReset = body['allowReset'] == "True"
             if oid != newOid and Origin.objects.filter(oid=newOid).exists():
-                result = {'success': False, 'info': 'Origin already taken!'}
+                result = {'success': False, 'info': 'Origin already taken! If you own this domain, please contact us.'}
             elif not isinstance(ttl, int) or ttl < 0:
                 result = {'success': False, 'info': 'TTL must be a positive Integer, without other characters.'}
             else:
@@ -574,14 +644,20 @@ def delAccount(request):
 @csrf_exempt
 def verifyToken(request):
     body = json.loads(request.body.decode('utf-8'))
-    id = body['id']
-    apiKey = body['apiKey']
+    auth_header = request.META.get('HTTP_AUTHORIZATION')
+    if auth_header and auth_header.startswith('Basic '):
+        pair = b642str(b64url_to_b64(auth_header.split(' ')[1])).split(":")
+        id = pair[0]
+        apiKey = pair[1]
+    elif 'client_id' in body and 'client_secret' in body:
+        id = body['client_id']
+        apiKey = body['client_secret']
+    else:
+        id = body['id']
+        apiKey = body['apiKey']
     auth = authenticate(id, apiKey)
     if auth[0]:
-        usr = body['usr']
-        key = body['token']
-        oid = auth[1]
-        return JsonResponse(authenticateToken(oid, usr, key, auth[2]), safe=False)
+        return JsonResponse(tokenExchange(body, auth), safe=False)
     else:
         return JsonResponse({'success': False, 'info': 'API Authentication Failed!'}, safe=False)
 
@@ -616,4 +692,3 @@ def newOriginAPI(request):
         result = {'success': False, 'info': auth['info']}
         response = JsonResponse(result, safe=False)
     return response
-
