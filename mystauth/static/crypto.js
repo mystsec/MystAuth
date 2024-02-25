@@ -144,7 +144,6 @@ async function AES_DECRYPT(key, ciphertext, iv)
       false,
       ["decrypt"]
     ).then(async (key) => {
-        console.log(key);
         await window.crypto.subtle.decrypt(
           {name: 'AES-GCM',
            iv: iv
