@@ -5,6 +5,7 @@ const urlParams = new URLSearchParams(queryString);
 const rid = document.getElementById("rid").innerHTML;
 const refLink = document.getElementById("ref").innerHTML;
 const rstLink = prepURL(document.getElementById("reset").innerHTML);
+const bioOnly = document.getElementById("bioOnly").innerHTML == "True";
 const eks = document.getElementById("eks").innerHTML == "True";
 var eksF = document.getElementById("eksF").innerHTML == "True";
 const isPopup = document.getElementById("display").innerHTML == "popup";
@@ -22,7 +23,7 @@ window.onload = async function() {
   {
     select("signin");
   }
-  if (! await checkSupport())
+  if (! await checkSupport(bioOnly))
   {
     noPasskeySupport();
   }
@@ -416,7 +417,7 @@ async function authenticateUser(cred, usr)
 async function select(id) {
   if (!isLoading)
   {
-    let support = await checkSupport();
+    let support = await checkSupport(bioOnly);
     let reset = document.getElementById("reset").innerHTML.length > 0;
     let resetCont = document.getElementById("reset_container");
 
