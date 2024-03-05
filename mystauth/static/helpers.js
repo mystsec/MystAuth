@@ -1,26 +1,3 @@
-async function checkSupport() {
-  let bioOnly = document.getElementById("bioOnly").innerHTML == "True";
-  if (window.PublicKeyCredential) {
-    if (!bioOnly)
-    {
-      return true;
-    }
-    else
-    {
-      let plat = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-      if (plat) {
-        return true;
-      }
-      else {
-        return false;
-      }
-    }
-  }
-  else {
-    return false;
-  }
-}
-
 function checkCookieSupport() {
   return navigator.cookieEnabled;
 }
