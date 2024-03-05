@@ -1,3 +1,26 @@
+//Check for passkey support, bioOnly indicates platform authenticator required for support to be true
+async function checkSupport(bioOnly) {
+  if (window.PublicKeyCredential) {
+    if (!bioOnly)
+    {
+      return true;
+    }
+    else
+    {
+      let plat = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+      if (plat) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+  }
+  else {
+    return false;
+  }
+}
+
 /*
 Convert  an ArrayBuffer into a string
 from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
