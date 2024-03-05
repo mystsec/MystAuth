@@ -4,6 +4,7 @@ const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const rid = urlParams.get('rid');
 const refLink = document.getElementById("ref").innerHTML;
+const bioOnly = document.getElementById("bioOnly").innerHTML == "True";
 var token = document.getElementById("token").innerHTML;
 const eks = document.getElementById("eks").innerHTML == "True";
 var nativeKeys = false;
@@ -12,7 +13,7 @@ var fKeys = "";
 var fData = "";
 
 window.onload = async function() {
-  if (! await checkSupport())
+  if (! await checkSupport(bioOnly))
   {
     noPasskeySupport();
   }
