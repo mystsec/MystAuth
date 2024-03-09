@@ -118,9 +118,8 @@ function td2int(arr) {
   return [dint, tint];
 }
 
-async function decodeFData(skey, efkey, edata)
+async function decodeFData(skey, fkey, edata)
 {
-  let fkey = await RSA_DECRYPT(skey, efkey);
   let fdata = await RSA_DECRYPT(skey, edata);
 
   fdata = fdata.split(":");
