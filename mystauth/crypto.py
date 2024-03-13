@@ -221,6 +221,7 @@ def generateCode(oid, usr, nonce, ttl=45, key="", fkey="", edata=""):
         code = secrets.token_hex(64)
     token = Token(oid=oid, user=usr, hash=code, salt="none", ttl=ttl, rst=False, key=key, fkey=fkey, edata=edata)
     token.save()
+    return code
 
 
 #Generates New Origin
