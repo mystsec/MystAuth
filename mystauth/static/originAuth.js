@@ -124,7 +124,7 @@ form.addEventListener('submit', async function(e) {
 
                     let publicKeyCredentialRequestOptions = {
                       challenge: data.challenge,
-                      rpId: "localhost",
+                      rpId: "mystauth.com",
                       timeout: 60000,
                       allowCredentials: [{
                         type: "public-key",
