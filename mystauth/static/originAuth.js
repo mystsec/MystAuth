@@ -112,8 +112,8 @@ form.addEventListener('submit', async function(e) {
                   if (eksF)
                   {
                     var fKeyData = await generate_AES_KEY();
-                    let fk = await RSA_ENCRYPT(urlParams.get('pbk'), fKeyData[0]);
-                    fKeys = b64_to_b64url(fk);
+                    //let fk = await RSA_ENCRYPT(urlParams.get('pbk'), fKeyData[0]);
+                    fKeys = b64_to_b64url(fKeyData[0]);
                     let fd = await AES_ENCRYPT(fKeyData[0], keyData[0]);
                     fData = b64_to_b64url(fd[0]) + ":" + b64_to_b64url(fd[1]);
                   }
@@ -141,7 +141,20 @@ form.addEventListener('submit', async function(e) {
                     }).then(async (assertion) => {
                       nativeKeys = assertion.getClientExtensionResults().largeBlob.written;
                       registerUser(cred, data);
-                    });
+                    }).catch(async (e) => {
+                        await fetch('/api/v1/user/register/drop/', {
+                          method: "POST",
+                          mode: "same-origin",
+                          credentials: "same-origin",
+                          headers: {'X-CSRFToken': csrftoken},
+                          body: JSON.stringify({'usr': usr, 'rid': rid, 'uid': uid})
+                        });
+                        loaded();
+                        notify("Cancelled or Failed!", 0);
+                        console.log(e.stack);
+                        console.log(e.name);
+                        console.log(e.message);
+                      });
                   }
                   else
                   {
