@@ -81,6 +81,10 @@ body {
   border-color: var(--contrast);
 }
 
+.selector div[aria-selected=false] {
+  filter: brightness(0.92);
+}
+
 .selector div[aria-selected="true"] {
   border-width: 1px 1px 0 1px;
   border-bottom: 1px solid white;
