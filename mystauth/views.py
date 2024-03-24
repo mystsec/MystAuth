@@ -40,6 +40,7 @@ from .crypto import (
     getRedirectURL,
     sigKeyIDs,
     sigPath,
+    clearSpaces,
 )
 import os
 import json
@@ -214,7 +215,7 @@ def userRegOpts(request):
     if getOrigin.apiTokens <= 0:
         return JsonResponse(['failed', 'Contact site admin! Err: api_token_limit'], safe=False)
 
-    if Auth.objects.filter(user=username, oid=oid).exists():
+    if Auth.objects.filter(user__iexact=username, oid=oid).exists():
         result = ['failed', 'Username already taken!']
     else:
         uuid = getUID()
@@ -258,15 +259,21 @@ def userRegOpts(request):
 
 def regDrop(request):
     body = json.loads(request.body.decode('utf-8'))
-    username = body['usr']
+    username = clearSpaces(body['usr'])
     rid = body['rid']
     uid = body['uid']
+
+    if len(username) > 255:
+        return JsonResponse({'success': True}, safe=False)
+
+    if not re.match("^[a-zA-Z0-9_-]+$", username):
+        return JsonResponse({'success': True}, safe=False)
 
     getOrigin = Origin.objects.get(rid=rid)
     oid = getattr(getOrigin, 'oid')
 
-    if Auth.objects.filter(user=username, uid=uid, oid=oid).exists():
-        auth = Auth.objects.get(user=username, uid=uid, oid=oid)
+    if Auth.objects.filter(user__iexact=username, uid=uid, oid=oid).exists():
+        auth = Auth.objects.get(user__iexact=username, uid=uid, oid=oid)
         if auth.pbk == '':
             auth.delete()
 
@@ -427,14 +434,20 @@ def resetRegister(request):
 
 def userAuthOpts(request):
     body = json.loads(request.body.decode('utf-8'))
-    username = body['usr']
+    username = clearSpaces(body['usr'])
     rid = body['rid']
     eks = body['eks']
+
+    if len(username) > 255:
+        return JsonResponse(['failed', 'Incorrect Username!'], safe=False)
+
+    if not re.match("^[a-zA-Z0-9_-]+$", username):
+        return JsonResponse(['failed', 'Incorrect Username!'], safe=False)
 
     getOrigin = Origin.objects.get(rid=rid)
     oid = getattr(getOrigin, 'oid')
 
-    user = Auth.objects.filter(user=username, oid=oid)
+    user = Auth.objects.filter(user__iexact=username, oid=oid)
     if user.exists():
         user = user.first()
         cid = getattr(user, 'credId')
@@ -463,9 +476,15 @@ def userAuthOpts(request):
 def userAuthenticate(request):
     body = json.loads(request.body.decode('utf-8'))
     response = AuthenticationCredential.parse_raw(json.dumps(body['resp']))
-    username = body['usr']
+    username = clearSpaces(body['usr'])
     rid = body['rid']
     ref = body['ref']
+
+    if len(username) > 255:
+        return JsonResponse(['failed', 'Unsecure Login! Please Reload and Try Again!'], safe=False)
+
+    if not re.match("^[a-zA-Z0-9_-]+$", username):
+        return JsonResponse(['failed', 'Unsecure Login! Please Reload and Try Again!'], safe=False)
 
     getOrigin = Origin.objects.get(rid=rid)
     oid = getattr(getOrigin, 'oid')
@@ -473,10 +492,9 @@ def userAuthenticate(request):
     if not checkURL(ref, oid):
         return JsonResponse(['failed', 'Unsecure Login! Please Reload and Try Again!'], safe=False)
 
-    getUser = Auth.objects.get(user=username, oid=oid)
+    getUser = Auth.objects.get(user__iexact=username, oid=oid)
     eChallenge = getattr(getUser, 'challenge')
     eChallenge = base64url_to_bytes(eChallenge)
-
 
     pbk = getattr(getUser, 'pbk')
     pbk = b64Toby(pbk)
@@ -692,3 +710,4 @@ def newOriginAPI(request):
         result = {'success': False, 'info': auth['info']}
         response = JsonResponse(result, safe=False)
     return response
+
