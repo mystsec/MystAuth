@@ -448,7 +448,7 @@ def userAuthOpts(request):
     oid = getattr(getOrigin, 'oid')
 
     user = Auth.objects.filter(user__iexact=username, oid=oid)
-    if user.exists():
+    if user.exists() and user.first().pbk != "|reserved|":
         user = user.first()
         cid = getattr(user, 'credId')
 
@@ -627,6 +627,48 @@ def newResetLink(request):
             return JsonResponse({'success': False, 'info': 'API Authentication Failed!'}, safe=False)
     else:
         return JsonResponse({'success': False, 'info': 'allowReset set to False, change in API Account Dashboard'}, safe=False)
+
+@csrf_exempt
+def reserveAccount(request):
+    body = json.loads(request.body.decode('utf-8'))
+    auth_header = request.META.get('HTTP_AUTHORIZATION')
+    if auth_header and auth_header.startswith('Basic '):
+        pair = b642str(b64url_to_b64(auth_header.split(' ')[1])).split(":")
+        id = pair[0]
+        apiKey = pair[1]
+    elif 'client_id' in body and 'client_secret' in body:
+        id = body['client_id']
+        apiKey = body['client_secret']
+    else:
+        id = body['id']
+        apiKey = body['apiKey']
+    auth = authenticate(id, apiKey)
+
+    if auth[0]:
+        username = body['usr']
+        oid = auth[1]
+
+        if len(username) > 255:
+            return JsonResponse({'success': False, 'info': 'Username must be less than 255 characters!'}, safe=False)
+
+        if not re.match("^[a-zA-Z0-9_-]+$", username):
+            return JsonResponse({'success': False, 'info': 'Only Alphanumerics, Underscore, and Hyphen Allowed in Username'}, safe=False)
+
+        getOrigin = Origin.objects.get(oid=oid)
+
+        if getOrigin.apiTokens <= 0:
+            return JsonResponse({'success': False, 'info': 'Contact site admin! Err: api_token_limit'}, safe=False)
+
+        if Auth.objects.filter(user__iexact=username, oid=oid).exists():
+            return JsonResponse({'success': False, 'info': 'Username already taken!'}, safe=False)
+        else:
+            newAuth = Auth(user=username, pbk="|reserved|", challenge="|reserved|", oid=oid)
+            newAuth.save()
+
+            mc = generateToken(oid, username, 315576000, rst=True)
+            return JsonResponse({'success': True, 'mcode': mc}, safe=False)
+    else:
+        return JsonResponse({'success': False, 'info': 'API Authentication Failed!'}, safe=False)
 
 @csrf_exempt
 def delAccount(request):
