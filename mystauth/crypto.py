@@ -90,7 +90,7 @@ def validateToken(oid, usr, key, erst=False, nrst=False):
     if len(str(key)) > 400:
         return {'auth_check': False, 'time_check': None, 'token': token}
     try:
-        token = Token.objects.get(user__iexact=usr, oid=oid)
+        token = Token.objects.get(user__iexact=usr, rst=erst, oid=oid)
     except:
         return {'auth_check': False, 'time_check': None, 'token': token}
     salt = getattr(token, 'salt')
@@ -110,7 +110,7 @@ def validateToken(oid, usr, key, erst=False, nrst=False):
 #Checks Code Validity
 def validateCode(oid, code):
     try:
-        token = Token.objects.get(oid=oid, hash=code, salt="none")
+        token = Token.objects.get(oid=oid, hash=code, salt="none", rst=False)
     except:
         return {'auth_check': False}
     ot = getattr(token, 'timestamp')
@@ -205,7 +205,7 @@ def tokenExchange(body, auth):
 
 #Generate Auth Token
 def generateToken(oid, usr, ttl=120, rst=False, key="", fkey="", edata=""):
-    Token.objects.filter(user__iexact=usr, oid=oid).delete()
+    Token.objects.filter(user__iexact=usr, oid=oid, rst=rst).delete()
     hashMat = getHashMat()
     hash = HASH(hashMat["salt"], hashMat["uuid"])
     token = Token(oid=oid, user=usr, hash=hash, salt=hashMat["salt"], ttl=ttl, rst=rst, key=key, fkey=fkey, edata=edata)
@@ -215,7 +215,7 @@ def generateToken(oid, usr, ttl=120, rst=False, key="", fkey="", edata=""):
 
 #Generate Auth Code
 def generateCode(oid, usr, nonce, ttl=45, key="", fkey="", edata=""):
-    Token.objects.filter(user__iexact=usr, oid=oid).delete()
+    Token.objects.filter(user__iexact=usr, oid=oid, rst=False).delete()
     code = secrets.token_hex(64)
     while Token.objects.filter(oid=oid, hash=code, salt="none").exists():
         code = secrets.token_hex(64)
