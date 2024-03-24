@@ -90,7 +90,7 @@ def validateToken(oid, usr, key, erst=False, nrst=False):
     if len(str(key)) > 400:
         return {'auth_check': False, 'time_check': None, 'token': token}
     try:
-        token = Token.objects.get(user=usr, oid=oid)
+        token = Token.objects.get(user__iexact=usr, oid=oid)
     except:
         return {'auth_check': False, 'time_check': None, 'token': token}
     salt = getattr(token, 'salt')
@@ -205,7 +205,7 @@ def tokenExchange(body, auth):
 
 #Generate Auth Token
 def generateToken(oid, usr, ttl=120, rst=False, key="", fkey="", edata=""):
-    Token.objects.filter(user=usr, oid=oid).delete()
+    Token.objects.filter(user__iexact=usr, oid=oid).delete()
     hashMat = getHashMat()
     hash = HASH(hashMat["salt"], hashMat["uuid"])
     token = Token(oid=oid, user=usr, hash=hash, salt=hashMat["salt"], ttl=ttl, rst=rst, key=key, fkey=fkey, edata=edata)
@@ -215,14 +215,13 @@ def generateToken(oid, usr, ttl=120, rst=False, key="", fkey="", edata=""):
 
 #Generate Auth Code
 def generateCode(oid, usr, nonce, ttl=45, key="", fkey="", edata=""):
-    Token.objects.filter(user=usr, oid=oid).delete()
+    Token.objects.filter(user__iexact=usr, oid=oid).delete()
     code = secrets.token_hex(64)
     while Token.objects.filter(oid=oid, hash=code, salt="none").exists():
         code = secrets.token_hex(64)
     token = Token(oid=oid, user=usr, hash=code, salt="none", ttl=ttl, rst=False, key=key, fkey=fkey, edata=edata)
     token.save()
     return code
-
 
 #Generates New Origin
 def newOrigin(oid, ttl=3600, bio_only=False, hashFct=1):
@@ -289,9 +288,8 @@ def getRedirectURL(url, usr, oid, body):
     if 'eksUnavailable' in body:
         key = False
     if "code" in type:
-        if "code" in type:
-            token = generateCode(oid, usr, body['nonce'], 45, key, fkey, edata)
-            params['code'] = token
+        token = generateCode(oid, usr, body['nonce'], 45, key, fkey, edata)
+        params['code'] = token
     elif "myst" in type:
         token = generateToken(oid, usr, 45, False, key, fkey, edata)
         params = {'usr': usr, 'token': token}
