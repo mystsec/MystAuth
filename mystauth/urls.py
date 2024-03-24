@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/v1/origin/delete/', views.delAPI),
     path('api/v1/user/delete/', views.delAccount),
     path('api/v1/user/reset/', views.newResetLink),
+    path('api/v1/user/reserve/', views.reserveAccount),
     path('.well-known/openid-configuration/', views.oidcConfig),
     path('api/v1/certs/', views.oidcSigningCerts),
 ]
