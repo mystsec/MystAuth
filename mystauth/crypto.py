@@ -11,6 +11,7 @@ import pytz
 from urllib.parse import urlparse, unquote, urlencode, parse_qs, urlunparse
 import re
 from jwt import JWT, jwk_from_pem
+from hmac import compare_digest as ts_equals
 
 #Initialize JWT util
 jwtUtil = JWT()
@@ -104,7 +105,7 @@ def validateToken(oid, usr, key, erst=False, nrst=False):
     ct = pst.localize(datetime.datetime.now())
     td = ct - ot
     hashed = HASH(salt, key)
-    return {'auth_check': str(hashed) == str(hash), 'time_check': td.seconds < ttl, 'token': token}
+    return {'auth_check': ts_equals(str(hashed), str(hash)), 'time_check': td.seconds < ttl, 'token': token}
 
 
 #Checks Code Validity
@@ -151,7 +152,7 @@ def authenticate(id, uuid):
     oid = getattr(get, 'oid')
     ttl = getattr(get, 'ttl')
     hashed = HASH(salt, uuid)
-    return [str(hashed) == str(hash), oid, ttl]
+    return [ts_equals(str(hashed), str(hash)), oid, ttl]
 
 
 #Handles Token Endpoint
