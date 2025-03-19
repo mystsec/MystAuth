@@ -24,6 +24,7 @@ class Origin(models.Model):
     hashFct = models.PositiveBigIntegerField(default=1)
     userCount = models.PositiveBigIntegerField(default=0)
     apiTokens = models.PositiveBigIntegerField(default=100)
+    restricted = models.BooleanField(default=False)
     #ips = jsonfield.JSONField(blank=True)
 
 class Token(models.Model):
