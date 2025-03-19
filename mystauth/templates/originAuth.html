@@ -42,10 +42,10 @@
   </head>
   <body>
     <div id="selector" class="selector">
-        <div id="signup" name="selection" onclick="select(this.id)" aria-selected="true">
+        <div id="signup" name="selection" onclick="select(this.id)" aria-selected="true" {% if usrL == "True" %} full-size="true" {% endif %} {% if rstr == "True" %} style="display: none" {% endif %}>
             <h1>Sign Up</h1>
         </div><!--
-     --><div id="signin" name="selection" onclick="select(this.id)" aria-selected="false">
+     --><div id="signin" name="selection" onclick="select(this.id)" aria-selected="false" {% if usrL == "True" %} style="display: none" {% endif %} {% if rstr == "True" %} full-size="true" {% endif %}>
             <h1>Log In</h1>
         </div>
     </div>
@@ -53,8 +53,8 @@
         <div id="auth_form_container">
             <form id="auth_form">
                 {% csrf_token %}
-                <input id="usr" type="text" placeholder="Enter Username" value="{{ usr }}">
-                <button id="submit" style="background">Create Account</button>
+                <input id="usr" type="text" placeholder="Enter Username" value="{{ usr }}" {% if usrL == "True" %} readonly="readonly" {% endif %}>
+                <button id="submit">Create Account</button>
             </form>
             <p id="notif"></p>
         </div>
@@ -76,6 +76,8 @@
     {% endif %}
     <div hidden="none">
         <div id="bioOnly">{{ bioOnly }}</div>
+        <div id="rstr">{{ rstr }}</div>
+        <div id="usrL">{{ usrL }}</div>
         <div id="eks">{{ eks }}</div>
         <div id="eksF">{{ eksF }}</div>
         <div id="ref">{{ ref }}</div>
