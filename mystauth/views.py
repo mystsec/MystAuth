@@ -115,7 +115,8 @@ def authPage(request, rid, ref):
     checkRef = checkURL(ref, oid)
 
     if checkRef:
-        data = {'bioOnly': str(getOrigin.bioOnly)}
+        rstr = getOrigin.restricted
+        data = {'bioOnly': str(getOrigin.bioOnly), 'rstr': str(rstr), 'usrL': "False"}
         if 'pbk' in request.GET and 'state' in request.GET:
             data['eks'] = 'True'
             if 'noFallback' in request.GET:
@@ -135,7 +136,10 @@ def authPage(request, rid, ref):
         if 'display' in request.GET and request.GET.get('display') == "popup":
             data['display'] = 'popup'
         if 'usr' in request.GET:
-            data['usr'] = re.sub(r'[^a-zA-Z0-9_-]', '', request.GET.get('usr'))
+            data['usr'] = re.sub(r'[^a-zA-Z0-9@._-]', '', request.GET.get('usr'))
+            if rstr and 'rstrtok' in request.GET and validateToken(oid, data['usr'], request.GET.get('rstrtok'), erst=True)['auth_check']:
+                data['usrL'] = 'True'
+                data['rstr'] = 'False'
         elif oid in request.COOKIES:
             data['usr'] = request.COOKIES.get(oid)
         if 'rst' in request.GET:
@@ -206,7 +210,7 @@ def userRegOpts(request):
     if len(username) > 255:
         return JsonResponse(['failed', 'Username must be less than 255 characters!'], safe=False)
 
-    if not re.match("^[a-zA-Z0-9_-]+$", username):
+    if not re.match("^[a-zA-Z0-9@._-]+$", username):
         return JsonResponse(['failed', 'Only Alphanumerics, Underscore, and Hyphen Allowed in Username'], safe=False)
 
     getOrigin = Origin.objects.get(rid=rid)
@@ -214,6 +218,9 @@ def userRegOpts(request):
 
     if getOrigin.apiTokens <= 0:
         return JsonResponse(['failed', 'Contact site admin! Err: api_token_limit'], safe=False)
+    elif getOrigin.restricted:
+        if not ('rstrtok' in body and validateToken(oid, username, body['rstrtok'], erst=True)['auth_check']):
+            return JsonResponse(['failed', 'Not Allowed!'], safe=False)
 
     if Auth.objects.filter(user__iexact=username, oid=oid).exists():
         result = ['failed', 'Username already taken!']
@@ -349,6 +356,17 @@ def userRegister(request):
     getUser = Auth.objects.get(uid=uid)
     usr = getUser.user
 
+    tokenVal = True
+    token = None
+
+    if 'rstrtok' in body:
+        validate = validateToken(oid, usr, body['rstrtok'], erst=True)
+        tokenVal = validate['auth_check']
+        token = validate['token']
+
+    if len(getUser.credId) > 0 or not tokenVal:
+        return JsonResponse(['failed', 'Not Allowed!'], safe=False)
+
     if not checkURL(ref, oid):
         Auth.objects.get(user=usr, oid=oid).delete()
         return JsonResponse(['failed', 'Unsecure Login! Please Reload and Try Again!'], safe=False)
@@ -378,6 +396,8 @@ def userRegister(request):
     getOrigin.userCount = getOrigin.userCount + 1
     getOrigin.apiTokens = getOrigin.apiTokens - 1
     getOrigin.save()
+    if token is not None:
+        token.delete()
     redirectURL = getRedirectURL(ref, usr, oid, body)
     resp = JsonResponse(['success', redirectURL], safe=False)
     resp.set_cookie(oid, usr, samesite='Lax', secure=True, httponly=True)
@@ -441,7 +461,7 @@ def userAuthOpts(request):
     if len(username) > 255:
         return JsonResponse(['failed', 'Incorrect Username!'], safe=False)
 
-    if not re.match("^[a-zA-Z0-9_-]+$", username):
+    if not re.match("^[a-zA-Z0-9@._-]+$", username):
         return JsonResponse(['failed', 'Incorrect Username!'], safe=False)
 
     getOrigin = Origin.objects.get(rid=rid)
@@ -483,7 +503,7 @@ def userAuthenticate(request):
     if len(username) > 255:
         return JsonResponse(['failed', 'Unsecure Login! Please Reload and Try Again!'], safe=False)
 
-    if not re.match("^[a-zA-Z0-9_-]+$", username):
+    if not re.match("^[a-zA-Z0-9@._-]+$", username):
         return JsonResponse(['failed', 'Unsecure Login! Please Reload and Try Again!'], safe=False)
 
     getOrigin = Origin.objects.get(rid=rid)
@@ -629,6 +649,34 @@ def newResetLink(request):
         return JsonResponse({'success': False, 'info': 'allowReset set to False, change in API Account Dashboard'}, safe=False)
 
 @csrf_exempt
+def getRstrToken(request):
+    print("attempting get rstrtok")
+    body = json.loads(request.body.decode('utf-8'))
+    id = body['id']
+    apiKey = body['apiKey']
+
+    try:
+        origin = Origin.objects.get(uid=id)
+    except:
+        return JsonResponse({'success': False, 'info': 'Not Allowed!'}, safe=False)
+
+    if origin.restricted:
+        auth = authenticate(id, apiKey)
+        if auth[0]:
+            usr = body['usr']
+            oid = auth[1]
+            if Auth.objects.filter(user__iexact=usr, oid=oid).exists():
+                return JsonResponse({'success': False, 'info': 'User already registered!'}, safe=False)
+
+            oid = auth[1]
+            tok = generateToken(oid, usr, 604800, rst=True)
+            return JsonResponse({'success': True, 'token': tok}, safe=False)
+        else:
+            return JsonResponse({'success': False, 'info': 'API Authentication Failed!'}, safe=False)
+    else:
+        return JsonResponse({'success': False, 'info': 'restricted set to False, sign ups are not restricted'}, safe=False)
+
+@csrf_exempt
 def reserveAccount(request):
     body = json.loads(request.body.decode('utf-8'))
     auth_header = request.META.get('HTTP_AUTHORIZATION')
@@ -752,4 +800,3 @@ def newOriginAPI(request):
         result = {'success': False, 'info': auth['info']}
         response = JsonResponse(result, safe=False)
     return response
-
