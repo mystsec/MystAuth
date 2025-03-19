@@ -32,7 +32,7 @@ body {
 .selector {
   width: 304px;
   margin: 0 auto;
-  margin-top: 35vh;
+  margin-top: calc((100vh - 300px)/2);
   text-align: center;
   font-size: 0.5rem;
 }
@@ -88,6 +88,30 @@ body {
 .selector div[aria-selected="true"] {
   border-width: 1px 1px 0 1px;
   border-bottom: 1px solid white;
+}
+
+#signin[full-size="true"] {
+  display: inline-block;
+  width: 300px;
+  margin: 0;
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  border-radius: 10px 10px 0 0;
+  border-color: var(--border_clr);
+  vertical-align: top;
+  cursor: pointer;
+}
+
+#signup[full-size="true"] {
+  display: inline-block;
+  width: 300px;
+  margin: 0;
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  border-radius: 10px 10px 0 0;
+  border-color: var(--border_clr);
+  vertical-align: top;
+  cursor: pointer;
 }
 
 .content {
