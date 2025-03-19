@@ -6,6 +6,8 @@ const rid = document.getElementById("rid").innerHTML;
 const refLink = document.getElementById("ref").innerHTML;
 const rstLink = prepURL(document.getElementById("reset").innerHTML);
 const bioOnly = document.getElementById("bioOnly").innerHTML == "True";
+const rstr = document.getElementById("rstr").innerHTML == "True";
+const usrL = document.getElementById("usrL").innerHTML == "True";
 const eks = document.getElementById("eks").innerHTML == "True";
 var eksF = document.getElementById("eksF").innerHTML == "True";
 const isPopup = document.getElementById("display").innerHTML == "popup";
@@ -18,10 +20,16 @@ var fData = "";
 var eData = "";
 
 window.onload = async function() {
-  document.getElementById("usr").value = "";
-  if (window.location.hash == "#login")
+  if (usrL) {
+    select("signup");
+  }
+  else if (window.location.hash == "#login" || rstr)
   {
+    document.getElementById("usr").value = "";
     select("signin");
+  }
+  else {
+    document.getElementById("usr").value = "";
   }
   if (! await checkSupport(bioOnly))
   {
@@ -48,15 +56,19 @@ form.addEventListener('submit', async function(e) {
   else if (!onlySpaces(usr) && t1) {
     loading();
 
-    if (/^[a-zA-Z0-9_-]+$/.test(usr))
+    if (/^[a-zA-Z0-9@._-]+$/.test(usr))
     {
+      let opts = {'usr': usr, 'rid': rid, 'eks': eks};
+      if (usrL) {
+        opts.rstrtok = urlParams.get('rstrtok');
+      }
       //Get Registration Options
       await fetch('/api/v1/user/register/get/', {
           method: "POST",
           mode: "same-origin",
           credentials: "same-origin",
           headers: {'X-CSRFToken': csrftoken},
-          body: JSON.stringify({'usr': usr, 'rid': rid, 'eks': eks})
+          body: JSON.stringify(opts)
       }).then(response => response.json())
         .then(async (data) => {
           //console.log(data);
@@ -337,7 +349,9 @@ async function registerUser(cred, data)
     bodyParams.response_type = "myst";
   }
 
-  console.log(bodyParams);
+  if (usrL) {
+    bodyParams.rstrtok = urlParams.get("rstrtok");
+  }
 
   //Register Credential on Server
   await fetch('/api/v1/user/register/verify/', {
@@ -450,7 +464,9 @@ async function select(id) {
           document.getElementById("submit").innerHTML = "Create Account";
           document.getElementById("loading_msg").innerHTML = "Use Device to Create . . .";
           lastUsr = document.getElementById("usr").value;
-          document.getElementById("usr").value = '';
+          if (!usrL) {
+            document.getElementById("usr").value = '';
+          }
         }
         else {
           document.getElementById("usr").value = lastUsr;
