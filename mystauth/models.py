@@ -4,13 +4,13 @@ from django.db import models
 class Auth(models.Model):
     user = models.TextField(editable=False)
     uid = models.TextField(editable=False) #unique
-    credId = models.TextField()
-    pbk = models.TextField()
-    challenge = models.TextField()
+    credId = models.TextField(editable=False)
+    pbk = models.TextField(editable=False)
+    challenge = models.TextField(editable=False)
     signCount = models.PositiveBigIntegerField(default=0)
     oid = models.TextField(editable=False, default="None")
     timestamp = models.DateTimeField(auto_now=False, auto_now_add=True)
-    fdata = models.TextField(null=True)
+    fdata = models.TextField(null=True, editable=False)
 
 class Origin(models.Model):
     oid = models.TextField() #unique
